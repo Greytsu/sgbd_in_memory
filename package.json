@@ -1,0 +1,22 @@
+{
+  "name": "sgbd_in_memory",
+  "version": "1.0.0",
+  "description": "none",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Greytsu/sgbd_in_memory.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Greytsu/sgbd_in_memory/issues"
+  },
+  "homepage": "https://github.com/Greytsu/sgbd_in_memory#readme",
+  "dependencies": {
+    "http": "^0.0.1-security"
+  }
+}
