@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { Response } = require('../services/responseService')
 
 exports.TableController = (req, res, config) => {
@@ -46,8 +47,10 @@ exports.TableController = (req, res, config) => {
                 return;
             }
 
-            const table = { name: name, columns: columns}
+            const table = { name: name, columns: columns.filter(x => x === 'ID').length > 0 ? columns : ["ID", ...columns]} 
             config.databases[databaseIndex].tables.push(table);
+
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 0, datas : [] }');
 
             Response(res, 201, JSON.stringify(table));
         });
