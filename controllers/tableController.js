@@ -31,7 +31,7 @@ exports.TableController = (req, res, config) => {
             data = chunk.toString();
         }).on('end', () => {
 
-            if(data.trim() === '' || !data){
+            if(IsEmptyOrNull(data)){
                 Response(res, 400, `{ "error": "Empty json"`);
                 return;
             }
@@ -50,7 +50,7 @@ exports.TableController = (req, res, config) => {
             const table = { name: name, columns: columns.filter(x => x === 'ID').length > 0 ? columns : ["ID", ...columns]} 
             config.databases[databaseIndex].tables.push(table);
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 0, "datas" : [] }');
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "datas" : [] }');
 
             Response(res, 201, JSON.stringify(table));
         });
@@ -60,7 +60,7 @@ exports.TableController = (req, res, config) => {
             data = chunk.toString();
         }).on('end', () => {
 
-            if(data.trim() === '' || !data){
+            if(IsEmptyOrNull(data)){
                 Response(res, 400, `{ "error": "Empty json"`);
                 return;
             }

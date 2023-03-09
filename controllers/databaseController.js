@@ -23,7 +23,7 @@ exports.DatabaseController = (req, res, config) => {
             data = chunk.toString();
         }).on('end', () => {
 
-            if(data.trim() === '' || !data){
+            if(IsEmptyOrNull(data)){
                 Response(res, 400, `{ "error": "Empty json"`);
                 return;
             }
