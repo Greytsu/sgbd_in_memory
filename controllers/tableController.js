@@ -50,7 +50,7 @@ exports.TableController = (req, res, config) => {
             const table = { name: name, columns: columns.filter(x => x === 'ID').length > 0 ? columns : ["ID", ...columns]} 
             config.databases[databaseIndex].tables.push(table);
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 0, datas : [] }');
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 0, "datas" : [] }');
 
             Response(res, 201, JSON.stringify(table));
         });
