@@ -1,1 +1,1 @@
-{"databases":[{"name":"school","tables":[{"name":"Student","columns":["Name","Age","Taille","PrincipalProfessor"]},{"name":"Professor","columns":["Name","Age","Classe"]}]}]}
+{"databases":[{"name":"school","tables":[{"name":"Student","columns":["Name","Age","Taille","PrincipalProfessor"]},{"name":"Professor","columns":["Name","Age","Classe"]}]},{"name":"Professor","tables":[]}]}
