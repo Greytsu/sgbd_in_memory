@@ -7,7 +7,12 @@ const { Response } = require('./services/responseService')
 const hostname = '127.0.0.1';
 const port = 3030;
 
-const configFilePath = 'config/config.json';
+const configDirectoryPath = 'config'
+const configFilePath = `${configDirectoryPath}/config.json`;
+
+if (!fs.existsSync(configDirectoryPath)){
+    fs.mkdirSync(configDirectoryPath);
+}
 if(!fs.existsSync(configFilePath)){
     fs.writeFileSync(configFilePath, '{"databases":[]}');
 }
@@ -41,5 +46,11 @@ server.listen(port, hostname, () => {
 
 setInterval(() => {
     console.log("Save file");
+    if (!fs.existsSync(configDirectoryPath)){
+        fs.mkdirSync(configDirectoryPath);
+    }
+    if(!fs.existsSync(configFilePath)){
+        fs.writeFileSync(configFilePath, JSON.stringify(config));
+    }
     fs.writeFileSync(configFilePath, JSON.stringify(config));
 }, 10000);
