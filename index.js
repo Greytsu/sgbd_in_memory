@@ -19,7 +19,7 @@ const server = http.createServer((req, res) => {
     const pathSplit = path.split("/");
 
     if(path === '/' && req.method === 'GET'){
-        Response(res, 200, `{"paths": ["status", "databases"]}`);
+        Response(res, 200, `{"paths": ["/status", "/databases"]}`);
     }
     else if(path === '/status' && req.method === 'GET'){
         Response(res, 200, `{"status": "OK"}`);
