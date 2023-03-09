@@ -2,7 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const { TableController } = require('./controllers/tableController');
 const { DatabaseController } = require('./controllers/databaseController');
-const { Response } = require('./services/responseService')
+const { Response } = require('./services/responseService');
+const { DataController } = require('./controllers/dataController');
 
 const hostname = '127.0.0.1';
 const port = 3030;
@@ -28,6 +29,9 @@ const server = http.createServer((req, res) => {
     }
     else if(path === '/status' && req.method === 'GET'){
         Response(res, 200, `{"status": "OK"}`);
+    }
+    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'datas'){
+        DataController(req, res, config);
     }
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables'){
         TableController(req, res, config);
