@@ -57,9 +57,9 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "datas" : [] }');
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "datas" : [], "index": []}');
             
-            config.databases[databaseName].tables[name] = { columns: []};
+            config.databases[databaseName].tables[name] = { columns: {}};
 
             Response(res, 201, JSON.stringify({ columns: 0, datas: 0 }));
         });
