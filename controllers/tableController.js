@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { Response } = require('../services/responseService')
+const { IsEmptyOrNull } = require('../utils/stringUtils');
 
 exports.TableController = (req, res, config) => {
     const path = req.url.split("?")[0];
@@ -16,12 +17,18 @@ exports.TableController = (req, res, config) => {
     if(method === 'GET'){
         const tableName = pathSplit[4];
         if (!tableName){
-            Response(res, 200, JSON.stringify(config.databases[databaseIndex].tables));
+            Response(res, 200, JSON.stringify(
+                config.databases[databaseIndex].tables.map(obj => {
+                    return {
+                        ...obj,
+                        datas: `${path}/${obj.name}/datas`
+                    };
+                })));
             return;
         }
         const tablesFilter = config.databases[databaseIndex].tables.filter(x => x.name == tableName);
         if (tablesFilter.length > 0){
-            Response(res, 200, JSON.stringify(tablesFilter[0]));
+            Response(res, 200, JSON.stringify({...tablesFilter[0], data: `${path}/datas`}));
             return;
         }
         Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
@@ -52,7 +59,7 @@ exports.TableController = (req, res, config) => {
 
             fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "datas" : [] }');
 
-            Response(res, 201, JSON.stringify(table));
+            Response(res, 201, JSON.stringify({...table, data: `${path}/${name}/datas`}));
         });
     }else if(method === 'PUT'){
         let data ='';
