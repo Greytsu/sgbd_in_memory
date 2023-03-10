@@ -61,7 +61,10 @@ exports.DatabaseController = (req, res, config) => {
         config.databases.splice(index, 1);
 
         Response(res, 204, '');
-    }else{
+    }else if(method === 'OPTIONS'){
+        Response(res, 200, '{ "method": ["GET", "POST", "DELETE"] }')
+    }
+    else{
         Response(res, 405, `{ "error": "Method not allowed" }`);
     }
 }

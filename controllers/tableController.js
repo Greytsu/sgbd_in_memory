@@ -100,7 +100,10 @@ exports.TableController = (req, res, config) => {
 
         Response(res, 204, '');
         res.end();
-    }else{
+    }else if(method === 'OPTIONS'){
+        Response(res, 200, '{ "method": ["GET", "POST", "PUT", "DELETE"] }')
+    }
+    else{
         Response(res, 405, `{ "error": "Method not allowed" }`);
     }
 }

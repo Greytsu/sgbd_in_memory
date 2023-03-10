@@ -118,7 +118,10 @@ exports.DataController = (req, res, config) => {
         fs.writeFileSync(dataFilePath, JSON.stringify(savedDatas));
 
         Response(res, 204, '');
-    }else{
+    }else if(method === 'OPTIONS'){
+        Response(res, 200, '{ "method": ["GET", "POST", "PUT", "DELETE"] }')
+    }
+    else{
         Response(res, 405, `{ "error": "Method not allowed" }`);
     }
 }
