@@ -5,10 +5,12 @@ exports.Response = (res, code, message) => {
     if(path === '/' || path === '/status'){
         res.setHeader("Access-Control-Allow-Methods", "GET")
     }
-    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables'){
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    else if(pathSplit[1] === 'databases' 
+    || (pathSplit[1] === 'databases' && pathSplit[3] === 'tables')){
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
     }
-    else if(pathSplit[1] === 'databases'){
+    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' 
+    && (pathSplit[3] === 'columns' || pathSplit[3] === 'datas')){
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
     }
 

@@ -7,7 +7,7 @@ const { DataController } = require('./controllers/dataController');
 
 const hostname = '127.0.0.1';
 const port = 3030;
-const saveInterval = 60000;
+const saveInterval = 10000;
 
 const configDirectoryPath = 'config'
 const configFilePath = `${configDirectoryPath}/config.json`;
@@ -16,15 +16,15 @@ if (!fs.existsSync(configDirectoryPath)){
     fs.mkdirSync(configDirectoryPath);
 }
 if(!fs.existsSync(configFilePath)){
-    fs.writeFileSync(configFilePath, '{"databases":[]}');
+    fs.writeFileSync(configFilePath, '{"databases":{}}');
 }
 const configRaws = fs.readFileSync(configFilePath);
 let config = JSON.parse(configRaws);
 
 const datasFiles = [];
-config.databases.forEach(database => {
-    database.tables.forEach(table => {
-        const dataFilePath = `config/${database.name}_${table.name}.json`;
+Object.keys(config.databases).forEach(databaseName => {
+    Object.keys(config.databases[databaseName].tables).forEach(tableName => {
+        const dataFilePath = `config/${databaseName}_${tableName}.json`;
         datasFiles.push({
             filePath: dataFilePath,
             data: JSON.parse(fs.readFileSync(dataFilePath))
@@ -43,10 +43,10 @@ const server = http.createServer((req, res) => {
         Response(res, 200, `{"status": "OK"}`);
     }
     else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
-        DatabaseController(req, res, config);
+        DatabaseController(req, res, config, datasFiles);
     } 
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit.length < 6){
-        TableController(req, res, config);
+        TableController(req, res, config, datasFiles);
     }
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'datas'){
         DataController(req, res, config, datasFiles);
