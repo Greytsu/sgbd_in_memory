@@ -12,6 +12,7 @@ exports.Response = (res, code, message) => {
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
     }
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.writeHead(code, {'Content-Type' : 'application/json'});
     res.end(message);
 }
