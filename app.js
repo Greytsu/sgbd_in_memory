@@ -35,22 +35,22 @@ config.databases.forEach(database => {
 const server = http.createServer((req, res) => {
     const path = req.url.split("?")[0].toLowerCase();
     const pathSplit = path.split("/");
-
+    console.log("pathSplit", pathSplit.length)
     if(path === '/' && req.method === 'GET'){
         Response(res, 200, `{"paths": ["/status", "/databases"]}`);
     }
     else if(path === '/status' && req.method === 'GET'){
         Response(res, 200, `{"status": "OK"}`);
     }
+    else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
+        DatabaseController(req, res, config);
+    } 
+    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit.length < 6){
+        TableController(req, res, config);
+    }
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'datas'){
         DataController(req, res, config, datasFiles);
     }
-    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables'){
-        TableController(req, res, config);
-    }
-    else if(pathSplit[1] === 'databases'){
-        DatabaseController(req, res, config);
-    } 
     else{
         Response(res, 404, `{"error": "Not found"}`);
     }
