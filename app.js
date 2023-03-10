@@ -7,7 +7,7 @@ const { DataController } = require('./controllers/dataController');
 
 const hostname = '127.0.0.1';
 const port = 3030;
-const saveInterval = 10000;
+const saveInterval = 60000;
 
 const configDirectoryPath = 'config'
 const configFilePath = `${configDirectoryPath}/config.json`;
@@ -35,7 +35,7 @@ config.databases.forEach(database => {
 const server = http.createServer((req, res) => {
     const path = req.url.split("?")[0].toLowerCase();
     const pathSplit = path.split("/");
-    console.log("pathSplit", pathSplit.length)
+    
     if(path === '/' && req.method === 'GET'){
         Response(res, 200, `{"paths": ["/status", "/databases"]}`);
     }
