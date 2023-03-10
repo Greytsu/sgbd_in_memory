@@ -1,3 +1,3 @@
 exports.IsEmptyOrNull = (string) => {
-    return string.trim() === '' || !string;
+    return !string || string.trim() === '';
 }
