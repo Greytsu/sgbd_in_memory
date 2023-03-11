@@ -4,6 +4,7 @@ const { TableController } = require('./controllers/tableController');
 const { DatabaseController } = require('./controllers/databaseController');
 const { Response } = require('./services/responseService');
 const { DataController } = require('./controllers/dataController');
+const { ColumnController } = require('./controllers/columnController');
 
 const hostname = '127.0.0.1';
 const port = 3030;
@@ -47,6 +48,9 @@ const server = http.createServer((req, res) => {
     } 
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit.length < 6){
         TableController(req, res, config, datasFiles);
+    }
+    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'columns'){
+        ColumnController(req, res, config, datasFiles);
     }
     else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'datas'){
         DataController(req, res, config, datasFiles);

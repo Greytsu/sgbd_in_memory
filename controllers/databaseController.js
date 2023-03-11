@@ -16,7 +16,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                             tables: Object.keys(config.databases[databaseName].tables).map(tableName =>{
                                 return {
                                     name: tableName,
-                                    columns: config.databases[name].tables[tableName].columns.length,
+                                    columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                                     datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
                                 }
                             })
@@ -31,7 +31,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                 tables: Object.keys(config.databases[name].tables).map(tableName =>{
                     return {
                         name: tableName,
-                        columns: config.databases[name].tables[tableName].columns.length,
+                        columns: Object.keys(config.databases[name].tables[tableName].columns).length,
                         datas: datasFiles.filter(x => x.filePath === `config/${name}_${tableName}.json`)[0].data.datas.length
                     }
                 })

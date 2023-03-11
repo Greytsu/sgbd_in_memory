@@ -20,7 +20,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                 Object.keys(config.databases[databaseName].tables).map(tableName => {
                     return {
                         name: tableName,
-                        columns: config.databases[databaseName].tables[tableName].columns.length,
+                        columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                         datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
                     };
                 })));
@@ -29,7 +29,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, JSON.stringify({
-                columns: config.databases[databaseName].tables[tableName].columns.length,
+                columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                 datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
             }));
             return;
@@ -57,7 +57,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "datas" : [], "index": []}');
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "key": null, "index": {}, "datas" : []}');
             
             config.databases[databaseName].tables[name] = { columns: {}};
 
@@ -98,7 +98,7 @@ exports.TableController = (req, res, config, datasFiles) => {
             return;
         }
         
-        if (!config.databases[tableName]){
+        if (!config.databases[databaseName].tables[tableName]){
             Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
             return;
         }
