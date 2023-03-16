@@ -106,12 +106,13 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
 
             if(columnObject.isIndex){
-                if (!savedDatas.data.index[name]){ // column is not an index
-                    savedDatas.data.index[name] = { }
+                if (!savedDatas.index[name]){ // column is not an index
+                    savedDatas.index[name] = { }
                 }
-            }else if (!columnObject.isIndex){
-                if (savedDatas.data.index[name]){ // column is an index
-                    delete savedDatas.data.index[name]
+            }
+            else{
+                if (savedDatas.index[name]){ // column is an index
+                    delete savedDatas.index[name]
                 }
             }
             config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
@@ -131,7 +132,8 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
 
         if (config.databases[databaseName].tables[tableName].columns[name].isIndex){
-            delete savedDatas.data.index[name]
+            console.log("savedDatas", savedDatas)
+            delete savedDatas.index[name]
         }
 
         delete config.databases[databaseName].tables[tableName].columns[name]
