@@ -21,7 +21,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                     return {
                         name: tableName,
                         columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                        datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
+                        datas: datasFiles[`config/${databaseName}_${tableName}.json`].datas.length
                     };
                 })));
             return;
@@ -30,7 +30,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, JSON.stringify({
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
+                datas: datasFiles[`config/${databaseName}_${tableName}.json`].datas.length
             }));
             return;
         }

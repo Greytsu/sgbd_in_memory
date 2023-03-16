@@ -22,14 +22,16 @@ if(!fs.existsSync(configFilePath)){
 const configRaws = fs.readFileSync(configFilePath);
 let config = JSON.parse(configRaws);
 
-const datasFiles = [];
+const datasFiles = {};
 Object.keys(config.databases).forEach(databaseName => {
     Object.keys(config.databases[databaseName].tables).forEach(tableName => {
         const dataFilePath = `config/${databaseName}_${tableName}.json`;
-        datasFiles.push({
-            filePath: dataFilePath,
-            data: JSON.parse(fs.readFileSync(dataFilePath))
-        })
+        datasFiles[dataFilePath] = JSON.parse(fs.readFileSync(dataFilePath))
+        // const dataFilePath = `config/${databaseName}_${tableName}.json`;
+        // datasFiles.push({
+        //     filePath: dataFilePath,
+        //     data: JSON.parse(fs.readFileSync(dataFilePath))
+        // })
     })
 });
 
@@ -75,15 +77,15 @@ setInterval(() => {
     fs.writeFileSync(configFilePath, JSON.stringify(config));
 }, saveInterval);
 
-datasFiles.forEach(datasFile => {
+Object.keys(datasFiles).forEach(datasFile => {
     setInterval(() => {
-        console.log(`Save file ${datasFile.filePath}`);
+        console.log(`Save file ${datasFile}`);
         if (!fs.existsSync(configDirectoryPath)){
             fs.mkdirSync(configDirectoryPath);
         }
-        if(!fs.existsSync(datasFile.filePath)){
-            fs.writeFileSync(datasFile.filePath, JSON.stringify(datasFile.data));
+        if(!fs.existsSync(datasFile)){
+            fs.writeFileSync(datasFile, JSON.stringify(datasFiles[datasFile]));
         }
-        fs.writeFileSync(datasFile.filePath, JSON.stringify(datasFile.data));
+        fs.writeFileSync(datasFile, JSON.stringify(datasFiles[datasFile]));
     }, saveInterval);
 })

@@ -18,8 +18,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         return;
     }
 
-    const dataFilePath = `config/${databaseName}_${tableName}.json`
-    const savedDatas = datasFiles.filter(x => x.filePath === dataFilePath)[0]
+    const savedDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
 
     if(method === 'GET'){
         const name = pathSplit[6];

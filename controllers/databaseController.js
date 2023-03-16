@@ -17,7 +17,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                                 return {
                                     name: tableName,
                                     columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                                    datas: datasFiles.filter(x => x.filePath === `config/${databaseName}_${tableName}.json`)[0].data.datas.length
+                                    datas: datasFiles[`config/${databaseName}_${tableName}.json`].datas.length
                                 }
                             })
                         }
@@ -32,7 +32,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                     return {
                         name: tableName,
                         columns: Object.keys(config.databases[name].tables[tableName].columns).length,
-                        datas: datasFiles.filter(x => x.filePath === `config/${name}_${tableName}.json`)[0].data.datas.length
+                        datas: datasFiles[`config/${name}_${tableName}.json`].datas.length
                     }
                 })
             }));

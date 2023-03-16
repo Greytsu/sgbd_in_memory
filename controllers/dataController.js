@@ -8,20 +8,17 @@ exports.DataController = (req, res, config, datasFiles) => {
     const method = req.method;
 
     const databaseName = pathSplit[2];
-    const databaseIndex = config.databases.findIndex(x => x.name == databaseName);
-    if (databaseIndex === -1){
+    if (!config.databases[databaseName]){
         Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
         return;
     }
     const tableName = pathSplit[4];
-    const tableIndex = config.databases[databaseIndex].tables.findIndex(x => x.name == tableName);
-    if (tableIndex === -1){
+    if (!config.databases[databaseName].tables[tableName]){
         Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
         return;
     }
 
-    const dataFilePath = `config/${databaseName}_${tableName}.json`
-    const savedDatas = datasFiles.filter(x => x.filePath === dataFilePath)[0]
+    const savedDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
 
     if(method === 'GET'){
         const ID = pathSplit[6];
