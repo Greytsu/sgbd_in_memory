@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { Response } = require('../services/responseService')
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
@@ -81,6 +82,11 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
             return;
         }
 
+        Object.keys(config.databases[name].tables).forEach(elem => {
+            const filePath = `config/${name}_${elem}.json`
+            fs.unlinkSync(filePath);
+            delete datasFiles[filePath]
+        })
         delete config.databases[name]
 
         Response(res, 204, '');
