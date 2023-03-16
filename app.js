@@ -27,11 +27,6 @@ Object.keys(config.databases).forEach(databaseName => {
     Object.keys(config.databases[databaseName].tables).forEach(tableName => {
         const dataFilePath = `config/${databaseName}_${tableName}.json`;
         datasFiles[dataFilePath] = JSON.parse(fs.readFileSync(dataFilePath))
-        // const dataFilePath = `config/${databaseName}_${tableName}.json`;
-        // datasFiles.push({
-        //     filePath: dataFilePath,
-        //     data: JSON.parse(fs.readFileSync(dataFilePath))
-        // })
     })
 });
 
