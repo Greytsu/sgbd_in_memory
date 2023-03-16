@@ -78,6 +78,11 @@ exports.DataController = (req, res, config, datasFiles) => {
         req.on('data', (chunk) => {
             data = chunk.toString();
         }).on('end', () => {
+
+            if (!savedDatas.datas[id]){
+                Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
+                return;
+            }
             
             if(IsEmptyOrNull(data)){
                 Response(res, 400, `{ "error": "Empty json"`);
@@ -92,10 +97,31 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            if (!savedDatas.datas[id]){
-                Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
-                return;
-            }
+            Object.keys(savedDatas.index).forEach(key => {
+                
+
+                if (!savedDatas.index[key][datasObject[key]]){
+                    savedDatas.index[key][datasObject[key]] = []
+                }
+                else{
+                    const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
+                    if (index !== -1){
+                        savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+                    }else{
+                        savedDatas.index[key][datasObject[key]].push(savedDatas.sequence)
+                    }
+                }
+            })
+
+            Object.keys(savedDatas.index).forEach(key => {
+                
+                if (index !== -1){
+                    savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+                }
+                if (savedDatas.index[key][savedDatas.datas[id][key]].length === 0){
+                    delete savedDatas.index[key][savedDatas.datas[id][key]]
+                }
+            })
 
             delete datasObject[savedDatas.key]
             savedDatas.datas[key] = datasObject;
