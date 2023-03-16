@@ -1,5 +1,5 @@
 const { Response } = require('../services/responseService');
-const { CompareObjectStruct, InitObject } = require('../utils/objectUtil');
+const { CompareObjectStruct, InitObject, SortObject } = require('../utils/objectUtil');
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
 exports.DataController = (req, res, config, datasFiles) => {
@@ -54,7 +54,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             
             const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns)
             const strucObject = InitObject(columnsName);
-            const datasObject = JSON.parse(data);
+            const datasObject = SortObject(JSON.parse(data));
             if(!CompareObjectStruct(strucObject, datasObject)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
@@ -91,7 +91,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns);
             const strucObject = InitObject(columnsName);
-            const datasObject = JSON.parse(data);
+            const datasObject = SortObject(JSON.parse(data));
             if(!CompareObjectStruct(strucObject, datasObject)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;

@@ -6,6 +6,14 @@ exports.InitObject = (props) => {
     return propsObj;
 }
 
+exports.SortObject = (obj) => {
+    const sortedObj = this.InitObject(Object.keys(obj).sort())
+    Object.keys(sortedObj).forEach(key => {
+        sortedObj[key] = obj[key]
+    })
+    return sortedObj
+}
+
 exports.CompareObjectStruct = (obj1, obj2) => {
     const keys1 = Object.keys(obj1).sort();
     const keys2 = Object.keys(obj2).sort();
