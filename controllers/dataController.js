@@ -21,19 +21,26 @@ exports.DataController = (req, res, config, datasFiles) => {
     const savedDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
 
     if(method === 'GET'){
-        const ID = pathSplit[6];
-        if (!ID){
-            Response(res, 200, JSON.stringify(savedDatas.data.datas));
+        const id = pathSplit[6];
+        if (IsEmptyOrNull(id)){
+            Response(res, 200, JSON.stringify(Object.keys(savedDatas.datas).map(elem => {
+                return{
+                    id: elem,
+                    ...savedDatas.datas[elem]
+                }
+            })));
             return;
         }
 
-        const savedData = savedDatas.data.datas.filter(x => x.ID == ID)
-        if (savedData.length > 0){
-            Response(res, 200, JSON.stringify(savedData[0]));
+        if (savedDatas.datas[id]){
+            Response(res, 200, JSON.stringify({
+                id: id,
+                ...savedDatas.datas[id]
+            }));
             return;
         }
 
-        Response(res, 400, `{ "error": "The object ${ID} not exist !" }`);
+        Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
     }else if(method === 'POST'){
         let data ='';
         req.on('data', (chunk) => {
@@ -45,22 +52,28 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            const columns = config.databases[databaseIndex].tables[tableIndex].columns.filter(x => x !== 'ID');
-            const strucObject = InitObject(columns);
-            
+            const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns)
+            const strucObject = InitObject(columnsName);
             const datasObject = JSON.parse(data);
             if(!CompareObjectStruct(strucObject, datasObject)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
             }
 
-            const combinedDatas = { ID: savedDatas.data.sequence++ , ...datasObject };
-            savedDatas.data.datas.push(combinedDatas);
+            savedDatas.sequence++
+            savedDatas.datas[savedDatas.sequence] = datasObject;
 
-            Response(res, 201, JSON.stringify(combinedDatas));
+            Object.keys(savedDatas.index).forEach(key => {
+                if (!savedDatas.index[key][datasObject[key]]){
+                    savedDatas.index[key][datasObject[key]] = []
+                }
+                savedDatas.index[key][datasObject[key]].push(savedDatas.sequence)
+            })
+
+            Response(res, 201, JSON.stringify({id: savedDatas.sequence, ...datasObject}));
         });
     }else if(method === 'PUT'){
-        const ID = pathSplit[6];
+        const id = pathSplit[6];
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -71,40 +84,47 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            const columns = config.databases[databaseIndex].tables[tableIndex].columns.filter(x => x !== 'ID');
-            const strucObject = InitObject(columns);
-            
+            const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns);
+            const strucObject = InitObject(columnsName);
             const datasObject = JSON.parse(data);
             if(!CompareObjectStruct(strucObject, datasObject)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
             }
 
-            const indexData = savedDatas.data.datas.findIndex(x => x.ID == ID)
-            if (indexData === -1){
-                Response(res, 400, `{ "error": "The object ${ID} not exist !" }`);
+            if (!savedDatas.datas[id]){
+                Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
                 return;
             }
-            
-            const combinedDatas = { ID: ID , ...datasObject };
-            savedDatas.data.datas[indexData] = combinedDatas
+
+            delete datasObject[savedDatas.key]
+            savedDatas.datas[key] = datasObject;
 
             Response(res, 204, '');
         });
     }else if(method === 'DELETE'){
-        const ID = pathSplit[6];
-        if (!ID){
+        const id = pathSplit[6];
+        if (!id){
             Response(res, 400, `{ "error": "Invalid path" }`);
             return;
         }
 
-        const indexData = savedDatas.data.datas.findIndex(x => x.ID == ID)
-        if (indexData === -1){
-            Response(res, 400, `{ "error": "The object ${ID} not exist !" }`);
+        if (!savedDatas.datas[id]){
+            Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
             return;
         }
 
-        savedDatas.data.datas.splice(indexData, 1);
+        Object.keys(savedDatas.index).forEach(key => {
+            const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
+            if (index !== -1){
+                savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+            }
+            if (savedDatas.index[key][savedDatas.datas[id][key]].length === 0){
+                delete savedDatas.index[key][savedDatas.datas[id][key]]
+            }
+        })
+        
+        delete savedDatas.datas[id]
 
         Response(res, 204, '');
     }else if(method === 'OPTIONS'){
