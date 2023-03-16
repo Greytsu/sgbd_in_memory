@@ -51,23 +51,25 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            const strucObject = InitObject(["name","isIndex"]);
+            const strucObject = InitObject(["name","isIndex", "type"]);
             const columnObject = JSON.parse(data);
             if(!CompareObjectStruct(strucObject, columnObject) 
             || typeof columnObject.isIndex !== 'boolean' 
-            || typeof columnObject.name !== 'string'){
+            || typeof columnObject.name !== 'string'
+            || typeof columnObject.type !== 'string'
+            || !["number", "string", "boolean"].includes(columnObject.type)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
             }
 
-            console.log("columnObject", columnObject)
             if (config.databases[databaseName].tables[tableName].columns[columnObject.name] !== undefined){
                 Response(res, 400, `{ "error": "The column ${columnObject.name} already exist !" }`);
                 return;
             }
 
             config.databases[databaseName].tables[tableName].columns[columnObject.name] = { 
-                isIndex: columnObject.isIndex 
+                isIndex: columnObject.isIndex,
+                type: columnObject.type
             }
 
             if(columnObject.isIndex){

@@ -55,7 +55,15 @@ exports.DataController = (req, res, config, datasFiles) => {
             const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns)
             const strucObject = InitObject(columnsName);
             const datasObject = SortObject(JSON.parse(data));
-            if(!CompareObjectStruct(strucObject, datasObject)){
+
+            let hasValidType = true;
+            Object.keys(datasObject).forEach(elem => {
+                if (config.databases[databaseName].tables[tableName].columns[elem].type !== typeof datasObject[elem]){
+                    hasValidType = false;
+                }
+            })
+            
+            if(!(CompareObjectStruct(strucObject, datasObject) && hasValidType)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
             }
@@ -92,7 +100,15 @@ exports.DataController = (req, res, config, datasFiles) => {
             const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns);
             const strucObject = InitObject(columnsName);
             const datasObject = SortObject(JSON.parse(data));
-            if(!CompareObjectStruct(strucObject, datasObject)){
+
+            let hasValidType = true;
+            Object.keys(datasObject).forEach(elem => {
+                if (config.databases[databaseName].tables[tableName].columns[elem].type !== typeof datasObject[elem]){
+                    hasValidType = false;
+                }
+            })
+
+            if(!(CompareObjectStruct(strucObject, datasObject) && hasValidType)){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
             }
@@ -114,7 +130,7 @@ exports.DataController = (req, res, config, datasFiles) => {
                     delete savedDatas.index[key][savedDatas.datas[id][key]]
                 }
             })
-            
+
             savedDatas.datas[id] = datasObject;
 
             Response(res, 204, '');
