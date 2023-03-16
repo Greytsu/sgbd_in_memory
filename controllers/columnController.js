@@ -51,10 +51,9 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            const strucObject = InitObject(["name", "isKey","isIndex"]);
+            const strucObject = InitObject(["name","isIndex"]);
             const columnObject = JSON.parse(data);
             if(!CompareObjectStruct(strucObject, columnObject) 
-            || typeof columnObject.isKey !== 'boolean' 
             || typeof columnObject.isIndex !== 'boolean' 
             || typeof columnObject.name !== 'string'){
                 Response(res, 400, `{ "error": "Invalid json" }`);
@@ -68,21 +67,11 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
 
             config.databases[databaseName].tables[tableName].columns[columnObject.name] = { 
-                isKey: columnObject.isKey, 
                 isIndex: columnObject.isIndex 
             }
 
-            if (columnObject.isKey){
-                savedDatas.data.key = columnObject.name
-                savedDatas.data.index[columnObject.name] = { }
-                Object.keys(config.databases[databaseName].tables[tableName].columns)
-                    .filter(key => key !== columnObject.name)
-                    .forEach(key =>  {
-                        config.databases[databaseName].tables[tableName].columns[key].isKey = false
-                    })
-                config.databases[databaseName].tables[tableName].columns[columnObject.name].isIndex = true
-            }else if(columnObject.isIndex){
-                savedDatas.data.index[columnObject.name] = { }
+            if(columnObject.isIndex){
+                savedDatas.index[columnObject.name] = { }
             }
 
             Response(res, 201, JSON.stringify(columnObject));
@@ -105,8 +94,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
             
             const columnObject = JSON.parse(data);
-            if(!CompareObjectStruct(InitObject(["isKey", "isIndex"]), columnObject) 
-            || typeof columnObject.isKey !== 'boolean' 
+            if(!CompareObjectStruct(InitObject(["isIndex"]), columnObject) 
             || typeof columnObject.isIndex !== 'boolean' ){
                 Response(res, 400, `{ "error": "Invalid json" }`);
                 return;
@@ -116,37 +104,17 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 Response(res, 400, `{ "error": "The column ${name} does not exist !" }`);
                 return;
             }
-            
-            if (savedDatas.data.key === name && !columnObject.isKey){
-                Response(res, 400, `{ "error": "Cannot remove primary key" }`);
-                return;
-            }
 
-            if (columnObject.isKey){
-                savedDatas.data.key = name
+            if(columnObject.isIndex){
                 if (!savedDatas.data.index[name]){ // column is not an index
                     savedDatas.data.index[name] = { }
                 }
-                
-                Object.keys(config.databases[databaseName].tables[tableName].columns)
-                    .forEach(key =>  {
-                        config.databases[databaseName].tables[tableName].columns[key].isKey = false
-                    })
-
-                config.databases[databaseName].tables[tableName].columns[name].isKey = true
-                config.databases[databaseName].tables[tableName].columns[name].isIndex = true
-            }else {
-                if(columnObject.isIndex){
-                    if (!savedDatas.data.index[name]){ // column is not an index
-                        savedDatas.data.index[name] = { }
-                    }
-                }else if (!columnObject.isIndex){
-                    if (savedDatas.data.index[name]){ // column is an index
-                        delete savedDatas.data.index[name]
-                    }
+            }else if (!columnObject.isIndex){
+                if (savedDatas.data.index[name]){ // column is an index
+                    delete savedDatas.data.index[name]
                 }
-                config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
             }
+            config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
 
             Response(res, 204, '');
         });
@@ -159,11 +127,6 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
         if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
             Response(res, 400, `{ "error": "The column ${name} not exist !" }`);
-            return;
-        }
-
-        if (savedDatas.data.key === name){
-            Response(res, 400, `{ "error": "Cannot delete primary key" }`);
             return;
         }
 

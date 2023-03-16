@@ -57,9 +57,12 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "key": null, "index": {}, "datas" : {}}');
+            const filePath = `config/${databaseName}_${name}.json`
+            const datas = {sequence: 0, index: {}, datas: {}}
+            fs.writeFileSync(filePath, JSON.stringify(datas));
             
             config.databases[databaseName].tables[name] = { columns: {}};
+            datasFiles[filePath] = datas;
 
             Response(res, 201, JSON.stringify({ columns: 0, datas: 0 }));
         });
@@ -102,7 +105,11 @@ exports.TableController = (req, res, config, datasFiles) => {
             Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
             return;
         }
-
+        
+        const filePath = `config/${databaseName}_${tableName}.json`
+        fs.unlinkSync(filePath);
+        delete datasFiles[filePath]
+        
         delete config.databases[databaseName].tables[tableName]
 
         Response(res, 204, '');
