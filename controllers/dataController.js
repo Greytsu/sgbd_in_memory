@@ -73,7 +73,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             Response(res, 201, JSON.stringify({id: savedDatas.sequence, ...datasObject}));
         });
     }else if(method === 'PUT'){
-        const id = pathSplit[6];
+        const id = parseInt(pathSplit[6]);
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -99,32 +99,23 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             Object.keys(savedDatas.index).forEach(key => {
                 
+                const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
+                if (index !== -1){
+                    savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+                }
 
                 if (!savedDatas.index[key][datasObject[key]]){
                     savedDatas.index[key][datasObject[key]] = []
                 }
-                else{
-                    const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
-                    if (index !== -1){
-                        savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
-                    }else{
-                        savedDatas.index[key][datasObject[key]].push(savedDatas.sequence)
-                    }
-                }
-            })
-
-            Object.keys(savedDatas.index).forEach(key => {
                 
-                if (index !== -1){
-                    savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
-                }
+                savedDatas.index[key][datasObject[key]].push(id)
+
                 if (savedDatas.index[key][savedDatas.datas[id][key]].length === 0){
                     delete savedDatas.index[key][savedDatas.datas[id][key]]
                 }
             })
-
-            delete datasObject[savedDatas.key]
-            savedDatas.datas[key] = datasObject;
+            
+            savedDatas.datas[id] = datasObject;
 
             Response(res, 204, '');
         });
