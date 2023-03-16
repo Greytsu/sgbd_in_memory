@@ -21,7 +21,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                     return {
                         name: tableName,
                         columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                        datas: datasFiles[`config/${databaseName}_${tableName}.json`].datas.length
+                        datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].datas).length
                     };
                 })));
             return;
@@ -30,7 +30,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, JSON.stringify({
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                datas: datasFiles[`config/${databaseName}_${tableName}.json`].datas.length
+                datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].datas).length
             }));
             return;
         }
@@ -57,7 +57,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "key": null, "index": {}, "datas" : []}');
+            fs.writeFileSync(`config/${databaseName}_${name}.json`, '{"sequence" : 1, "key": null, "index": {}, "datas" : {}}');
             
             config.databases[databaseName].tables[name] = { columns: {}};
 
