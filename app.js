@@ -5,10 +5,10 @@ const { DatabaseController } = require('./controllers/databaseController');
 const { Response } = require('./services/responseService');
 const { DataController } = require('./controllers/dataController');
 const { ColumnController } = require('./controllers/columnController');
+const { SaveFile } = require('./services/fileService');
 
 const hostname = '127.0.0.1';
 const port = 3030;
-const saveInterval = 10000;
 
 const configDirectoryPath = 'config'
 const configFilePath = `${configDirectoryPath}/config.json`;
@@ -26,7 +26,8 @@ const datasFiles = {};
 Object.keys(config.databases).forEach(databaseName => {
     Object.keys(config.databases[databaseName].tables).forEach(tableName => {
         const dataFilePath = `config/${databaseName}_${tableName}.json`;
-        datasFiles[dataFilePath] = JSON.parse(fs.readFileSync(dataFilePath))
+        datasFiles[dataFilePath] = {}
+        datasFiles[dataFilePath].file = JSON.parse(fs.readFileSync(dataFilePath))
     })
 });
 
@@ -61,26 +62,8 @@ server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
 
-setInterval(() => {
-    console.log(`Save file ${configFilePath}`);
-    if (!fs.existsSync(configDirectoryPath)){
-        fs.mkdirSync(configDirectoryPath);
-    }
-    if(!fs.existsSync(configFilePath)){
-        fs.writeFileSync(configFilePath, JSON.stringify(config));
-    }
-    fs.writeFileSync(configFilePath, JSON.stringify(config));
-}, saveInterval);
+SaveFile(configFilePath, config)
 
 Object.keys(datasFiles).forEach(datasFile => {
-    setInterval(() => {
-        console.log(`Save file ${datasFile}`);
-        if (!fs.existsSync(configDirectoryPath)){
-            fs.mkdirSync(configDirectoryPath);
-        }
-        if(!fs.existsSync(datasFile)){
-            fs.writeFileSync(datasFile, JSON.stringify(datasFiles[datasFile]));
-        }
-        fs.writeFileSync(datasFile, JSON.stringify(datasFiles[datasFile]));
-    }, saveInterval);
+    datasFiles[datasFile].interval = SaveFile(datasFile, datasFiles[datasFile].file)
 })
