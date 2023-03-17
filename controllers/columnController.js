@@ -18,7 +18,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         return;
     }
 
-    const savedDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
+    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
 
     if(method === 'GET'){
         const name = pathSplit[6];
@@ -73,7 +73,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
 
             if(columnObject.isIndex){
-                savedDatas.index[columnObject.name] = { }
+                fileDatas.index[columnObject.name] = { }
             }
 
             Response(res, 201, JSON.stringify(columnObject));
@@ -108,13 +108,13 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
 
             if(columnObject.isIndex){
-                if (!savedDatas.index[name]){ // column is not an index
-                    savedDatas.index[name] = { }
+                if (!fileDatas.index[name]){ // column is not an index
+                    fileDatas.index[name] = { }
                 }
             }
             else{
-                if (savedDatas.index[name]){ // column is an index
-                    delete savedDatas.index[name]
+                if (fileDatas.index[name]){ // column is an index
+                    delete fileDatas.index[name]
                 }
             }
             config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
@@ -134,8 +134,8 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
 
         if (config.databases[databaseName].tables[tableName].columns[name].isIndex){
-            console.log("savedDatas", savedDatas)
-            delete savedDatas.index[name]
+            console.log("fileDatas", fileDatas)
+            delete fileDatas.index[name]
         }
 
         delete config.databases[databaseName].tables[tableName].columns[name]

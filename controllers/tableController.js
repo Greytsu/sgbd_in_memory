@@ -1,5 +1,7 @@
 const fs = require('fs');
+const { SaveFile } = require('../services/fileService');
 const { Response } = require('../services/responseService')
+const { CompareObjectStruct, InitObject } = require('../utils/objectUtil');
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
 exports.TableController = (req, res, config, datasFiles) => {
@@ -21,7 +23,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                     return {
                         name: tableName,
                         columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                        datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].datas).length
+                        datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
                     };
                 })));
             return;
@@ -30,7 +32,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, JSON.stringify({
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].datas).length
+                datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
             }));
             return;
         }
@@ -46,55 +48,33 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            const { name } = JSON.parse(data);
-            if(IsEmptyOrNull(name)){
+            const strucObject = InitObject(["name"]);
+            const tableObject = JSON.parse(data);
+            if(!CompareObjectStruct(strucObject, tableObject) 
+            || typeof tableObject.name !== 'string'
+            || IsEmptyOrNull(tableObject.name)){
                 Response(res, 400, `{ "error": "Invalid json"`);
                 return;
             }
             
-            if (config.databases[databaseName].tables[name]){
-                Response(res, 400, `{ "error": "The table ${name} already exist !" }`);
+            if (config.databases[databaseName].tables[tableObject.name]){
+                Response(res, 400, `{ "error": "The table ${tableObject.name} already exist !" }`);
                 return;
             }
 
-            const filePath = `config/${databaseName}_${name}.json`
+            const filePath = `config/${databaseName}_${tableObject.name}.json`
             const datas = {sequence: 0, index: {}, datas: {}}
             fs.writeFileSync(filePath, JSON.stringify(datas));
             
-            config.databases[databaseName].tables[name] = { columns: {}};
-            datasFiles[filePath] = datas;
+            config.databases[databaseName].tables[tableObject.name] = { columns: {}};
+            datasFiles[filePath] = {};
+            datasFiles[filePath].file = datas;
+            datasFiles[filePath].interval = SaveFile(filePath, datas)
 
+            console.log("datasFiles", datasFiles)
             Response(res, 201, JSON.stringify({ columns: 0, datas: 0 }));
         });
-    }/*else if(method === 'PUT'){
-        let data ='';
-        req.on('data', (chunk) => {
-            data = chunk.toString();
-        }).on('end', () => {
-
-            if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
-                return;
-            }
-            
-            const { name, columns } = JSON.parse(data);
-            if(name === '' || !name || columns.lenght <= 0 || !columns){
-                Response(res, 400, `{ "error": "Invalid json"`);
-                return;
-            }
-            
-            const index = config.databases[databaseIndex].tables.findIndex(x => x.name == name);
-            if (index === -1){
-                Response(res, 400, `{ "error": "The table ${name} not exist !" }`);
-                return;
-            }
-
-            const table = { name: name, columns: columns}
-            config.databases[databaseIndex].tables[index] = table;
-
-            Response(res, 204, '');
-        });
-    }*/else if(method === 'DELETE'){
+    }else if(method === 'DELETE'){
         const tableName = pathSplit[4];
         if(IsEmptyOrNull(tableName)){
             Response(res, 400, `{ "error": "Invalid path" }"`);
@@ -107,8 +87,9 @@ exports.TableController = (req, res, config, datasFiles) => {
         }
         
         const filePath = `config/${databaseName}_${tableName}.json`
-        fs.unlinkSync(filePath);
+        clearInterval(datasFiles[filePath].interval)
         delete datasFiles[filePath]
+        fs.unlinkSync(filePath);
         
         delete config.databases[databaseName].tables[tableName]
 

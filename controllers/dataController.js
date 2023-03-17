@@ -18,24 +18,24 @@ exports.DataController = (req, res, config, datasFiles) => {
         return;
     }
 
-    const savedDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
+    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
 
     if(method === 'GET'){
         const id = pathSplit[6];
         if (IsEmptyOrNull(id)){
-            Response(res, 200, JSON.stringify(Object.keys(savedDatas.datas).map(elem => {
+            Response(res, 200, JSON.stringify(Object.keys(fileDatas.datas).map(elem => {
                 return{
                     id: elem,
-                    ...savedDatas.datas[elem]
+                    ...fileDatas.datas[elem]
                 }
             })));
             return;
         }
 
-        if (savedDatas.datas[id]){
+        if (fileDatas.datas[id]){
             Response(res, 200, JSON.stringify({
                 id: id,
-                ...savedDatas.datas[id]
+                ...fileDatas.datas[id]
             }));
             return;
         }
@@ -68,17 +68,17 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            savedDatas.sequence++
-            savedDatas.datas[savedDatas.sequence] = datasObject;
+            fileDatas.sequence++
+            fileDatas.datas[fileDatas.sequence] = datasObject;
 
-            Object.keys(savedDatas.index).forEach(key => {
-                if (!savedDatas.index[key][datasObject[key]]){
-                    savedDatas.index[key][datasObject[key]] = []
+            Object.keys(fileDatas.index).forEach(key => {
+                if (!fileDatas.index[key][datasObject[key]]){
+                    fileDatas.index[key][datasObject[key]] = []
                 }
-                savedDatas.index[key][datasObject[key]].push(savedDatas.sequence)
+                fileDatas.index[key][datasObject[key]].push(fileDatas.sequence)
             })
 
-            Response(res, 201, JSON.stringify({id: savedDatas.sequence, ...datasObject}));
+            Response(res, 201, JSON.stringify({id: fileDatas.sequence, ...datasObject}));
         });
     }else if(method === 'PUT'){
         const id = parseInt(pathSplit[6]);
@@ -87,7 +87,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             data = chunk.toString();
         }).on('end', () => {
 
-            if (!savedDatas.datas[id]){
+            if (!fileDatas.datas[id]){
                 Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
                 return;
             }
@@ -113,25 +113,25 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            Object.keys(savedDatas.index).forEach(key => {
+            Object.keys(fileDatas.index).forEach(key => {
                 
-                const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
+                const index = fileDatas.index[key][fileDatas.datas[id][key]].findIndex(x => x == id)
                 if (index !== -1){
-                    savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+                    fileDatas.index[key][fileDatas.datas[id][key]].splice(index, 1);
                 }
 
-                if (!savedDatas.index[key][datasObject[key]]){
-                    savedDatas.index[key][datasObject[key]] = []
+                if (!fileDatas.index[key][datasObject[key]]){
+                    fileDatas.index[key][datasObject[key]] = []
                 }
                 
-                savedDatas.index[key][datasObject[key]].push(id)
+                fileDatas.index[key][datasObject[key]].push(id)
 
-                if (savedDatas.index[key][savedDatas.datas[id][key]].length === 0){
-                    delete savedDatas.index[key][savedDatas.datas[id][key]]
+                if (fileDatas.index[key][fileDatas.datas[id][key]].length === 0){
+                    delete fileDatas.index[key][fileDatas.datas[id][key]]
                 }
             })
 
-            savedDatas.datas[id] = datasObject;
+            fileDatas.datas[id] = datasObject;
 
             Response(res, 204, '');
         });
@@ -142,22 +142,22 @@ exports.DataController = (req, res, config, datasFiles) => {
             return;
         }
 
-        if (!savedDatas.datas[id]){
+        if (!fileDatas.datas[id]){
             Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
             return;
         }
 
-        Object.keys(savedDatas.index).forEach(key => {
-            const index = savedDatas.index[key][savedDatas.datas[id][key]].findIndex(x => x == id)
+        Object.keys(fileDatas.index).forEach(key => {
+            const index = fileDatas.index[key][fileDatas.datas[id][key]].findIndex(x => x == id)
             if (index !== -1){
-                savedDatas.index[key][savedDatas.datas[id][key]].splice(index, 1);
+                fileDatas.index[key][fileDatas.datas[id][key]].splice(index, 1);
             }
-            if (savedDatas.index[key][savedDatas.datas[id][key]].length === 0){
-                delete savedDatas.index[key][savedDatas.datas[id][key]]
+            if (fileDatas.index[key][fileDatas.datas[id][key]].length === 0){
+                delete fileDatas.index[key][fileDatas.datas[id][key]]
             }
         })
         
-        delete savedDatas.datas[id]
+        delete fileDatas.datas[id]
 
         Response(res, 204, '');
     }else if(method === 'OPTIONS'){
