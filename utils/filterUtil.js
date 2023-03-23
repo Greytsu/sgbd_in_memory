@@ -4,8 +4,6 @@ exports.DynamicFilter = (columns, datafile, filters) => {
         const ids = []
         if (columns[filter.key]?.isIndex){
             Object.keys(datafile.index[filter.key]).forEach(fieldValue => {
-                console.log("fieldValue", fieldValue)
-                console.log("datafile.index[filter.key]", datafile.index[filter.key][fieldValue])
                 if (Compare(fieldValue, filter.operator, filter.value)){
                     ids.push(...datafile.index[filter.key][fieldValue])
                 }
@@ -13,7 +11,6 @@ exports.DynamicFilter = (columns, datafile, filters) => {
         }
         else{
             Object.keys(datafile.datas).forEach(id => {
-                console.log("id", id)
                 if(Compare(datafile.datas[id][filter.key], filter.operator, filter.value)){
                     ids.push(parseInt(id))
                 }
@@ -21,8 +18,10 @@ exports.DynamicFilter = (columns, datafile, filters) => {
         }
         idsResults.push(ids)
     })
-    return idsResults.reduce((acc, curr) => acc.concat(curr))
-        .filter((value, index, array) => array.indexOf(value) === index && array.lastIndexOf(value) !== index);
+    console.log("idsResults", idsResults)
+    return idsResults.length > 1 ? idsResults.reduce((acc, curr) => acc.concat(curr))
+        .filter((value, index, array) => array.indexOf(value) === index && array.lastIndexOf(value) !== index)
+        : idsResults[0]
 }
 
 const Compare = (value1, operator, value2) =>{
@@ -46,7 +45,8 @@ const Compare = (value1, operator, value2) =>{
 
 exports.GetFilter = (req) => {
     const params = new URLSearchParams(new URL(`localhost:3030${req.url}`).search);
-    const filterparams = params.get('filter').split(',')
+    const filterString = params.get('filters');
+    const filterparams = filterString ? filterString.split(',') : []
 
     const filters = []
     filterparams.forEach(filterparam => {

@@ -44,13 +44,13 @@ const server = http.createServer((req, res) => {
     else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
         DatabaseController(req, res, config, datasFiles);
     } 
-    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit.length < 6){
+    else if(pathSplit[1] === 'databases' && pathSplit.length < 5){
         TableController(req, res, config, datasFiles);
     }
-    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'columns'){
+    else if(pathSplit[1] === 'databases' &&pathSplit[4] === 'columns'){
         ColumnController(req, res, config, datasFiles);
     }
-    else if(pathSplit[1] === 'databases' && pathSplit[3] === 'tables' && pathSplit[5] === 'datas'){
+    else if(pathSplit[1] === 'databases' && pathSplit[4] === 'datas'){
         DataController(req, res, config, datasFiles);
     }
     else{

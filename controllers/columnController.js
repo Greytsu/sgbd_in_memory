@@ -12,7 +12,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
         return;
     }
-    const tableName = pathSplit[4];
+    const tableName = pathSplit[3];
     if (!config.databases[databaseName].tables[tableName]){
         Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
         return;
@@ -21,7 +21,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
     const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
 
     if(method === 'GET'){
-        const name = pathSplit[6];
+        const name = pathSplit[5];
         if (IsEmptyOrNull(name)){
             Response(res, 200, JSON.stringify(
                 Object.keys(config.databases[databaseName].tables[tableName].columns).map(columnName =>{
@@ -79,7 +79,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             Response(res, 201, JSON.stringify(columnObject));
         });
     }else if(method === 'PUT'){
-        const name = pathSplit[6];
+        const name = pathSplit[5];
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -122,7 +122,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             Response(res, 204, '');
         });
     }else if(method === 'DELETE'){
-        const name = pathSplit[6];
+        const name = pathSplit[5];
         if (IsEmptyOrNull(name)){
             Response(res, 400, `{ "error": "Invalid path" }`);
             return;
