@@ -68,7 +68,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
 
             config.databases[databaseObject.name] = { tables: {} }
 
-            Response(res, 201, JSON.stringify({ tables: [] }));
+            Response(res, 201, JSON.stringify({ name: databaseObject.name, tables: [] }));
         });
     }else if(method === 'DELETE'){
         

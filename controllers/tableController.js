@@ -72,7 +72,7 @@ exports.TableController = (req, res, config, datasFiles) => {
             datasFiles[filePath].interval = SaveFile(filePath, datas)
 
             console.log("datasFiles", datasFiles)
-            Response(res, 201, JSON.stringify({ columns: 0, datas: 0 }));
+            Response(res, 201, JSON.stringify({ name: tableObject.name, columns: 0, datas: 0 }));
         });
     }else if(method === 'DELETE'){
         const tableName = pathSplit[4];
