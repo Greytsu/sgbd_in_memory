@@ -1,4 +1,5 @@
 const { Response } = require('../services/responseService');
+const { GetFilter, DynamicFilter } = require('../utils/filterUtil');
 const { CompareObjectStruct, InitObject, SortObject } = require('../utils/objectUtil');
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
@@ -23,7 +24,22 @@ exports.DataController = (req, res, config, datasFiles) => {
     if(method === 'GET'){
         const id = pathSplit[6];
         if (IsEmptyOrNull(id)){
-            Response(res, 200, JSON.stringify(Object.keys(fileDatas.datas).map(elem => {
+
+            const filters = GetFilter(req)
+            if(filters.length === 0) {
+                Response(res, 200, JSON.stringify(Object.keys(fileDatas.datas).map(elem => {
+                    return{
+                        id: elem,
+                        ...fileDatas.datas[elem]
+                    }
+                })));
+                return;
+            }
+
+            console.log("filters", filters)
+            const result = DynamicFilter(config.databases[databaseName].tables[tableName].columns, fileDatas, filters)
+            console.log("result", result)
+            Response(res, 200, JSON.stringify(result.map(elem => {
                 return{
                     id: elem,
                     ...fileDatas.datas[elem]
