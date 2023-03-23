@@ -15,7 +15,7 @@ exports.Response = (res, code, message) => {
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Request-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.writeHead(code, {'Content-Type' : 'application/json'});
     res.end(message);
 }
