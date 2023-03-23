@@ -16,19 +16,19 @@ exports.TableController = (req, res, config, datasFiles) => {
     }
     console.log("databaseName", databaseName)
     if(method === 'GET'){
-        const tableName = pathSplit[3];
-        // if (!tableName){
-        //     Response(res, 200, JSON.stringify(
-        //         Object.keys(config.databases[databaseName].tables).map(tableName => {
-        //             return {
-        //                 name: tableName,
-        //                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-        //                 datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
-        //             };
-        //         })));
-        //     return;
-        // }
-        console.log("tableName", tableName)
+        const tableName = pathSplit[4];
+        if (!tableName){
+            Response(res, 200, JSON.stringify(
+                Object.keys(config.databases[databaseName].tables).map(tableName => {
+                    return {
+                        name: tableName,
+                        columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
+                        datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
+                    };
+                })));
+            return;
+        }
+        
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, JSON.stringify({
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
@@ -75,7 +75,7 @@ exports.TableController = (req, res, config, datasFiles) => {
             Response(res, 201, JSON.stringify({ name: tableObject.name, columns: 0, datas: 0 }));
         });
     }else if(method === 'DELETE'){
-        const tableName = pathSplit[3];
+        const tableName = pathSplit[4];
         if(IsEmptyOrNull(tableName)){
             Response(res, 400, `{ "error": "Invalid path" }"`);
             return;

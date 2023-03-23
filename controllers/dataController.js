@@ -13,7 +13,7 @@ exports.DataController = (req, res, config, datasFiles) => {
         Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
         return;
     }
-    const tableName = pathSplit[3];
+    const tableName = pathSplit[4];
     if (!config.databases[databaseName].tables[tableName]){
         Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
         return;
@@ -22,7 +22,7 @@ exports.DataController = (req, res, config, datasFiles) => {
     const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
 
     if(method === 'GET'){
-        const id = pathSplit[5];
+        const id = pathSplit[6];
         if (IsEmptyOrNull(id)){
 
             const filters = GetFilter(req)
@@ -97,7 +97,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             Response(res, 201, JSON.stringify({id: fileDatas.sequence, ...datasObject}));
         });
     }else if(method === 'PUT'){
-        const id = parseInt(pathSplit[5]);
+        const id = parseInt(pathSplit[6]);
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -152,7 +152,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             Response(res, 204, '');
         });
     }else if(method === 'DELETE'){
-        const id = pathSplit[5];
+        const id = pathSplit[6];
         if (!id){
             Response(res, 400, `{ "error": "Invalid path" }`);
             return;
