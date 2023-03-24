@@ -10,7 +10,9 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
     
     if(method === 'GET'){
         const name = pathSplit[2];
-        if (IsEmptyOrNull(name)){
+        console.log("pathSplit.length", pathSplit.length)
+        console.log("name", name);
+        if (IsEmptyOrNull(name) && pathSplit.length === 2){
             Response(res, 200, JSON.stringify(
                 Object.keys(config.databases).map(databaseName => {
                         return {
@@ -30,7 +32,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
         }
 
         Response(res, 400, `{ "error": "The database ${name} not exist !" }`);
-    }else if(method === 'POST'){
+    }else if(method === 'POST' && pathSplit.length === 2){
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -58,7 +60,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
 
             Response(res, 201, JSON.stringify({ name: databaseObject.name, tables: 0 }));
         });
-    }else if(method === 'DELETE'){
+    }else if(method === 'DELETE' && pathSplit.length === 3){
         
         const name = pathSplit[2];
         if(IsEmptyOrNull(name)){
@@ -81,7 +83,11 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
 
         Response(res, 204, '');
     }else if(method === 'OPTIONS'){
-        Response(res, 200, '{ "method": ["GET", "POST", "DELETE"] }')
+        if (pathSplit.length === 2){
+            Response(res, 200, '{ "method": ["GET", "POST", "OPTIONS"] }')
+            return;
+        }
+        Response(res, 200, '{ "method": ["GET", "DELETE", "OPTIONS"] }')
     }
     else{
         Response(res, 405, `{ "error": "Method not allowed" }`);

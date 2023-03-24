@@ -22,7 +22,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
     if(method === 'GET'){
         const name = pathSplit[6];
-        if (IsEmptyOrNull(name)){
+        if (IsEmptyOrNull(name) && pathSplit.length === 6){
             Response(res, 200, JSON.stringify(
                 Object.keys(config.databases[databaseName].tables[tableName].columns).map(columnName =>{
                     return{
@@ -40,7 +40,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
 
         Response(res, 400, `{ "error": "The column ${name} not exist !" }`);
-    }else if(method === 'POST'){
+    }else if(method === 'POST' && pathSplit.length === 6){
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -78,7 +78,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
             Response(res, 201, JSON.stringify(columnObject));
         });
-    }else if(method === 'PUT'){
+    }else if(method === 'PUT' && pathSplit.length === 7){
         const name = pathSplit[6];
         let data ='';
         req.on('data', (chunk) => {
@@ -121,7 +121,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
             Response(res, 204, '');
         });
-    }else if(method === 'DELETE'){
+    }else if(method === 'DELETE' && pathSplit.length === 7){
         const name = pathSplit[6];
         if (IsEmptyOrNull(name)){
             Response(res, 400, `{ "error": "Invalid path" }`);
@@ -142,7 +142,11 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
         Response(res, 204, '');
     }else if(method === 'OPTIONS'){
-        Response(res, 200, '{ "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"] }')
+        if (pathSplit.length === 6){
+            Response(res, 200, '{ "method": ["GET", "POST", "OPTIONS"] }')
+            return;
+        }
+        Response(res, 200, '{ "method": ["GET", "PUT", "DELETE", "OPTIONS"] }')
     }
     else{
         Response(res, 405, `{ "error": "Method not allowed" }`);

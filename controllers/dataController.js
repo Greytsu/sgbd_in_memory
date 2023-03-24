@@ -24,7 +24,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
     if(method === 'GET'){
         const id = pathSplit[6];
-        if (IsEmptyOrNull(id)){
+        if (IsEmptyOrNull(id) && pathSplit.length === 6){
             let listIds = Object.keys(fileDatas.datas)
 
             const filters = GetFilter(req)
@@ -57,7 +57,7 @@ exports.DataController = (req, res, config, datasFiles) => {
         }
 
         Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
-    }else if(method === 'POST'){
+    }else if(method === 'POST' && pathSplit.length === 6){
         let data ='';
         req.on('data', (chunk) => {
             data = chunk.toString();
@@ -96,7 +96,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             Response(res, 201, JSON.stringify({id: fileDatas.sequence, ...datasObject}));
         });
-    }else if(method === 'PUT'){
+    }else if(method === 'PUT' && pathSplit.length === 7){
         const id = parseInt(pathSplit[6]);
         let data ='';
         req.on('data', (chunk) => {
@@ -151,7 +151,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             Response(res, 204, '');
         });
-    }else if(method === 'DELETE'){
+    }else if(method === 'DELETE' && pathSplit.length === 7){
         const id = pathSplit[6];
         if (!id){
             Response(res, 400, `{ "error": "Invalid path" }`);
@@ -177,7 +177,37 @@ exports.DataController = (req, res, config, datasFiles) => {
 
         Response(res, 204, '');
     }else if(method === 'OPTIONS'){
-        Response(res, 200, '{ "method": ["GET", "POST", "PUT", "DELETE"] }')
+        if (pathSplit.length === 6){
+            Response(res, 200, JSON.stringify({ 
+                method: ["GET", "POST", "OPTIONS"],
+                queryParam: [
+                    {
+                        name: "filter",
+                        methodAllowed: "GET",
+                        queryParam: {
+                            key: "filters",
+                            value: ["column name", "operator", "value"],
+                            operators: [">=", "<=", ">", "<", "!=", "="],
+                            separator: ","
+                        }
+                    },{
+                        name: "sort",
+                        methodAllowed: "GET",
+                        queryParam: {
+                            key: "sort",
+                            value: "column name",
+                            separator: ",",
+                            descending: {
+                                value: "!",
+                                info: "before value"
+                            }
+                        }
+                    }
+                ]
+            }))
+            return;
+        }
+        Response(res, 200, '{ "method": ["GET", "PUT", "DELETE", "OPTIONS"] }')
     }
     else{
         Response(res, 405, `{ "error": "Method not allowed" }`);
