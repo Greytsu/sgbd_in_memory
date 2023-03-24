@@ -18,7 +18,7 @@ exports.DynamicFilter = (columns, datafile, filters) => {
         }
         idsResults.push(ids)
     })
-    console.log("idsResults", idsResults)
+    
     return idsResults.length > 1 ? idsResults.reduce((acc, curr) => acc.concat(curr))
         .filter((value, index, array) => array.indexOf(value) === index && array.lastIndexOf(value) !== index)
         : idsResults[0]
