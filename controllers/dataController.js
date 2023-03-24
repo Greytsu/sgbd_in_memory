@@ -11,12 +11,12 @@ exports.DataController = (req, res, config, datasFiles) => {
 
     const databaseName = pathSplit[2];
     if (!config.databases[databaseName]){
-        Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
+        Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     const tableName = pathSplit[4];
     if (!config.databases[databaseName].tables[tableName]){
-        Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
+        Response(res, 400, { error: `The table ${tableName} does not exist !` });
         return;
     }
 
@@ -44,19 +44,16 @@ exports.DataController = (req, res, config, datasFiles) => {
                 datas = SortDatas(datas, sortFields)
             }
             
-            Response(res, 200, JSON.stringify(datas));
+            Response(res, 200, datas);
             return;
         }
 
         if (fileDatas.datas[id]){
-            Response(res, 200, JSON.stringify({
-                id: id,
-                ...fileDatas.datas[id]
-            }));
+            Response(res, 200, { id: id, ...fileDatas.datas[id] });
             return;
         }
 
-        Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
+        Response(res, 400, { error: `The object ${id} does not exist !` });
     }else if(method === 'POST' && pathSplit.length === 6){
         let data ='';
         req.on('data', (chunk) => {
@@ -64,7 +61,7 @@ exports.DataController = (req, res, config, datasFiles) => {
         }).on('end', () => {
 
             if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
+                Response(res, 400, { error: "Empty json" });
                 return;
             }
             
@@ -80,7 +77,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             })
             
             if(!(CompareObjectStruct(strucObject, datasObject) && hasValidType)){
-                Response(res, 400, `{ "error": "Invalid json" }`);
+                Response(res, 400, { error: "Invalid json" });
                 return;
             }
 
@@ -94,7 +91,7 @@ exports.DataController = (req, res, config, datasFiles) => {
                 fileDatas.index[key][datasObject[key]].push(fileDatas.sequence)
             })
 
-            Response(res, 201, JSON.stringify({id: fileDatas.sequence, ...datasObject}));
+            Response(res, 201, { id: fileDatas.sequence, ...datasObject });
         });
     }else if(method === 'PUT' && pathSplit.length === 7){
         const id = parseInt(pathSplit[6]);
@@ -104,12 +101,12 @@ exports.DataController = (req, res, config, datasFiles) => {
         }).on('end', () => {
 
             if (!fileDatas.datas[id]){
-                Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
+                Response(res, 400, { error: `The object ${id} does not exist !` });
                 return;
             }
             
             if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
+                Response(res, 400, { error: "Empty json" });
                 return;
             }
 
@@ -125,7 +122,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             })
 
             if(!(CompareObjectStruct(strucObject, datasObject) && hasValidType)){
-                Response(res, 400, `{ "error": "Invalid json" }`);
+                Response(res, 400, { error: "Invalid json" });
                 return;
             }
 
@@ -149,17 +146,17 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             fileDatas.datas[id] = datasObject;
 
-            Response(res, 204, '');
+            Response(res, 204);
         });
     }else if(method === 'DELETE' && pathSplit.length === 7){
         const id = pathSplit[6];
         if (!id){
-            Response(res, 400, `{ "error": "Invalid path" }`);
+            Response(res, 400, { error: "Invalid path" });
             return;
         }
 
         if (!fileDatas.datas[id]){
-            Response(res, 400, `{ "error": "The object ${id} not exist !" }`);
+            Response(res, 400, { error: `The object ${id} does not exist !` });
             return;
         }
 
@@ -175,10 +172,10 @@ exports.DataController = (req, res, config, datasFiles) => {
         
         delete fileDatas.datas[id]
 
-        Response(res, 204, '');
+        Response(res, 204);
     }else if(method === 'OPTIONS'){
         if (pathSplit.length === 6){
-            Response(res, 200, JSON.stringify({ 
+            Response(res, 200, { 
                 method: ["GET", "POST", "OPTIONS"],
                 queryParam: [
                     {
@@ -204,12 +201,12 @@ exports.DataController = (req, res, config, datasFiles) => {
                         }
                     }
                 ]
-            }))
+            })
             return;
         }
-        Response(res, 200, '{ "method": ["GET", "PUT", "DELETE", "OPTIONS"] }')
+        Response(res, 200, { method: ["GET", "PUT", "DELETE", "OPTIONS"] })
     }
     else{
-        Response(res, 405, `{ "error": "Method not allowed" }`);
+        Response(res, 405, { error: "Method not allowed" });
     }
 }

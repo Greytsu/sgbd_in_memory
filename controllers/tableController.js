@@ -11,33 +11,32 @@ exports.TableController = (req, res, config, datasFiles) => {
 
     const databaseName = pathSplit[2];
     if (!config.databases[databaseName]){
-        Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
+        Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     console.log("databaseName", databaseName)
     if(method === 'GET'){
         const tableName = pathSplit[4];
         if (IsEmptyOrNull(tableName) && pathSplit.length === 4){
-            Response(res, 200, JSON.stringify(
-                Object.keys(config.databases[databaseName].tables).map(tableName => {
+            Response(res, 200, Object.keys(config.databases[databaseName].tables).map(tableName => {
                     return {
                         name: tableName,
                         columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                         datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
                     };
-                })));
+                }));
             return;
         }
         
         if (config.databases[databaseName].tables[tableName]){
-            Response(res, 200, JSON.stringify({
+            Response(res, 200, {
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                 datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
-            }));
+            });
             return;
         }
 
-        Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
+        Response(res, 400, { error: `The table ${tableName} does not exist !` });
     }else if(method === 'POST' && pathSplit.length === 4){
         let data ='';
         req.on('data', (chunk) => {
@@ -45,7 +44,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         }).on('end', () => {
 
             if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
+                Response(res, 400, { error: "Empty json" });
                 return;
             }
             
@@ -54,12 +53,12 @@ exports.TableController = (req, res, config, datasFiles) => {
             if(!CompareObjectStruct(strucObject, tableObject) 
             || typeof tableObject.name !== 'string'
             || IsEmptyOrNull(tableObject.name)){
-                Response(res, 400, `{ "error": "Invalid json"`);
+                Response(res, 400, { error: "Invalid json" });
                 return;
             }
             
             if (config.databases[databaseName].tables[tableObject.name]){
-                Response(res, 400, `{ "error": "The table ${tableObject.name} already exist !" }`);
+                Response(res, 400, { error: `The table ${tableObject.name} already exist !` });
                 return;
             }
 
@@ -73,17 +72,17 @@ exports.TableController = (req, res, config, datasFiles) => {
             datasFiles[filePath].interval = SaveFile(filePath, datas)
 
             console.log("datasFiles", datasFiles)
-            Response(res, 201, JSON.stringify({ name: tableObject.name, columns: 0, datas: 0 }));
+            Response(res, 201, { name: tableObject.name, columns: 0, datas: 0 });
         });
     }else if(method === 'DELETE' && pathSplit.length === 5){
         const tableName = pathSplit[4];
         if(IsEmptyOrNull(tableName)){
-            Response(res, 400, `{ "error": "Invalid path" }"`);
+            Response(res, 400, { error: "Invalid path" });
             return;
         }
         
         if (!config.databases[databaseName].tables[tableName]){
-            Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
+            Response(res, 400, { error: `The table ${tableName} does not exist !` });
             return;
         }
         
@@ -94,15 +93,15 @@ exports.TableController = (req, res, config, datasFiles) => {
         
         delete config.databases[databaseName].tables[tableName]
 
-        Response(res, 204, '');
+        Response(res, 204);
     }else if(method === 'OPTIONS'){
         if (pathSplit.length === 4){
-            Response(res, 200, '{ "method": ["GET", "POST", "OPTIONS"] }')
+            Response(res, 200, { method: ["GET", "POST", "OPTIONS"] })
             return;
         }
-        Response(res, 200, '{ "method": ["GET", "DELETE", "OPTIONS"] }')
+        Response(res, 200, { method: ["GET", "DELETE", "OPTIONS"] })
     }
     else{
-        Response(res, 405, `{ "error": "Method not allowed" }`);
+        Response(res, 405, { error: "Method not allowed" });
     }
 }

@@ -9,12 +9,12 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
     const databaseName = pathSplit[2];
     if (!config.databases[databaseName]){
-        Response(res, 400, `{ "error": "The database ${databaseName} not exist !" }`);
+        Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     const tableName = pathSplit[4];
     if (!config.databases[databaseName].tables[tableName]){
-        Response(res, 400, `{ "error": "The table ${tableName} not exist !" }`);
+        Response(res, 400, { error: `The table ${tableName} does not exist !` });
         return;
     }
 
@@ -23,23 +23,22 @@ exports.ColumnController = (req, res, config, datasFiles) => {
     if(method === 'GET'){
         const name = pathSplit[6];
         if (IsEmptyOrNull(name) && pathSplit.length === 6){
-            Response(res, 200, JSON.stringify(
-                Object.keys(config.databases[databaseName].tables[tableName].columns).map(columnName =>{
+            Response(res, 200, Object.keys(config.databases[databaseName].tables[tableName].columns).map(columnName =>{
                     return{
                         name: columnName,
                         ...config.databases[databaseName].tables[tableName].columns[columnName]
                     }
                 })
-            ));
+            );
             return;
         }
         
         if (config.databases[databaseName].tables[tableName].columns[name]){
-            Response(res, 200, JSON.stringify({ ...config.databases[databaseName].tables[tableName].columns[name]}));
+            Response(res, 200, config.databases[databaseName].tables[tableName].columns[name]);
             return;
         }
 
-        Response(res, 400, `{ "error": "The column ${name} not exist !" }`);
+        Response(res, 400, { error: `The column ${name} does not exist !` });
     }else if(method === 'POST' && pathSplit.length === 6){
         let data ='';
         req.on('data', (chunk) => {
@@ -47,7 +46,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }).on('end', () => {
 
             if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
+                Response(res, 400, { error: "Empty json" });
                 return;
             }
             
@@ -58,12 +57,12 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             || typeof columnObject.name !== 'string'
             || typeof columnObject.type !== 'string'
             || !["number", "string", "boolean"].includes(columnObject.type)){
-                Response(res, 400, `{ "error": "Invalid json" }`);
+                Response(res, 400, { error: "Invalid json" });
                 return;
             }
 
             if (config.databases[databaseName].tables[tableName].columns[columnObject.name] !== undefined){
-                Response(res, 400, `{ "error": "The column ${columnObject.name} already exist !" }`);
+                Response(res, 400, { error: `The column ${columnObject.name} already exist !` });
                 return;
             }
 
@@ -76,7 +75,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 fileDatas.index[columnObject.name] = { }
             }
 
-            Response(res, 201, JSON.stringify(columnObject));
+            Response(res, 201, columnObject);
         });
     }else if(method === 'PUT' && pathSplit.length === 7){
         const name = pathSplit[6];
@@ -86,24 +85,24 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }).on('end', () => {
 
             if (IsEmptyOrNull(name)){
-                Response(res, 400, `{ "error": "Invalid path" }`);
+                Response(res, 400, { error: "Invalid path" });
                 return;
             }
 
             if(IsEmptyOrNull(data)){
-                Response(res, 400, `{ "error": "Empty json"`);
+                Response(res, 400, { error: "Empty json" });
                 return;
             }
             
             const columnObject = JSON.parse(data);
             if(!CompareObjectStruct(InitObject(["isIndex"]), columnObject) 
             || typeof columnObject.isIndex !== 'boolean' ){
-                Response(res, 400, `{ "error": "Invalid json" }`);
+                Response(res, 400, { error: "Invalid json" });
                 return;
             }
 
             if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
-                Response(res, 400, `{ "error": "The column ${name} does not exist !" }`);
+                Response(res, 400, { error: `The column ${name} does not exist !` });
                 return;
             }
 
@@ -119,17 +118,17 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
             config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
 
-            Response(res, 204, '');
+            Response(res, 204);
         });
     }else if(method === 'DELETE' && pathSplit.length === 7){
         const name = pathSplit[6];
         if (IsEmptyOrNull(name)){
-            Response(res, 400, `{ "error": "Invalid path" }`);
+            Response(res, 400, { error: "Invalid path" });
             return;
         }
 
         if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
-            Response(res, 400, `{ "error": "The column ${name} not exist !" }`);
+            Response(res, 400, { error: `The column ${name} does not exist !` });
             return;
         }
 
@@ -140,15 +139,15 @@ exports.ColumnController = (req, res, config, datasFiles) => {
 
         delete config.databases[databaseName].tables[tableName].columns[name]
 
-        Response(res, 204, '');
+        Response(res, 204);
     }else if(method === 'OPTIONS'){
         if (pathSplit.length === 6){
-            Response(res, 200, '{ "method": ["GET", "POST", "OPTIONS"] }')
+            Response(res, 200, { method: ["GET", "POST", "OPTIONS"] })
             return;
         }
-        Response(res, 200, '{ "method": ["GET", "PUT", "DELETE", "OPTIONS"] }')
+        Response(res, 200, { method: ["GET", "PUT", "DELETE", "OPTIONS"] })
     }
     else{
-        Response(res, 405, `{ "error": "Method not allowed" }`);
+        Response(res, 405, { error: "Method not allowed" });
     }
 }

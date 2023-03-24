@@ -36,10 +36,10 @@ const server = http.createServer((req, res) => {
     const pathSplit = path.split("/");
     
     if(path === '/' && req.method === 'GET'){
-        Response(res, 200, `{"paths": ["/status", "/databases"]}`);
+        Response(res, 200, { paths: ["/status", "/databases"] });
     }
     else if(path === '/status' && req.method === 'GET'){
-        Response(res, 200, `{"status": "OK"}`);
+        Response(res, 200, { status: "OK" });
     }
     else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
         DatabaseController(req, res, config, datasFiles);
@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
         DataController(req, res, config, datasFiles);
     }
     else{
-        Response(res, 404, `{"error": "Not found"}`);
+        Response(res, 404, { error: "Not found" });
     }
 });
 

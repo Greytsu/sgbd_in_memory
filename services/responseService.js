@@ -1,4 +1,4 @@
-exports.Response = (res, code, message) => {
+exports.Response = (res, code, messageObject = null) => {
     const path = res.req.url.split("?")[0];
     const pathSplit = path.split("/");
     
@@ -27,5 +27,10 @@ exports.Response = (res, code, message) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.writeHead(code, {'Content-Type' : 'application/json'});
-    res.end(message);
+    
+    if (messageObject){
+        res.end(JSON.stringify(messageObject));
+        return;
+    }
+    res.end()
 }
