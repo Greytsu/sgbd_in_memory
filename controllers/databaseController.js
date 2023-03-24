@@ -15,13 +15,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                 Object.keys(config.databases).map(databaseName => {
                         return {
                             name: databaseName,
-                            tables: Object.keys(config.databases[databaseName].tables).map(tableName =>{
-                                    return {
-                                        name: tableName,
-                                        columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
-                                        datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
-                                    }
-                            })
+                            tables: Object.keys(config.databases[databaseName].tables).length
                         }
                     })
                 ));
@@ -30,13 +24,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
         
         if (config.databases[name]){
             Response(res, 200, JSON.stringify({
-                tables: Object.keys(config.databases[name].tables).map(tableName =>{
-                    return {
-                        name: tableName,
-                        columns: Object.keys(config.databases[name].tables[tableName].columns).length,
-                        datas: Object.keys(datasFiles[`config/${name}_${tableName}.json`].file.datas).length
-                    }
-                })
+                tables: Object.keys(config.databases[name].tables).length
             }));
             return;
         }
@@ -68,7 +56,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
 
             config.databases[databaseObject.name] = { tables: {} }
 
-            Response(res, 201, JSON.stringify({ name: databaseObject.name, tables: [] }));
+            Response(res, 201, JSON.stringify({ name: databaseObject.name, tables: 0 }));
         });
     }else if(method === 'DELETE'){
         
