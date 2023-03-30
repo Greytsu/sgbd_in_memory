@@ -60,6 +60,11 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 Response(res, 400, { error: "Invalid json" });
                 return;
             }
+            
+            if (columnObject.name === "id"){
+                Response(res, 400, { error: `The column name "id" is not allowed !` });
+                return;
+            }
 
             if (config.databases[databaseName].tables[tableName].columns[columnObject.name] !== undefined){
                 Response(res, 400, { error: `The column ${columnObject.name} already exist !` });
@@ -74,6 +79,12 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             if(columnObject.isIndex){
                 fileDatas.index[columnObject.name] = { }
             }
+
+            Object.keys(fileDatas.datas).forEach(id => {
+                console.log("id", id)
+                console.log("columnObject.name", columnObject.name)
+                fileDatas.datas[id][columnObject.name] = null;
+            })
 
             Response(res, 201, columnObject);
         });
@@ -147,9 +158,16 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
 
         if (config.databases[databaseName].tables[tableName].columns[name].isIndex){
-            console.log("fileDatas", fileDatas)
             delete fileDatas.index[name]
         }
+        
+        Object.keys(fileDatas.datas).forEach(id => {
+            console.log("fileDatas.datas[id]", fileDatas.datas[id]);
+            console.log("columnObject.name", name);
+            console.log("fileDatas.datas[id][columnObject.name]", fileDatas.datas[id][name]);
+            delete fileDatas.datas[id][name];
+            console.log(fileDatas.datas[id]);
+        })
 
         delete config.databases[databaseName].tables[tableName].columns[name]
 
