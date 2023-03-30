@@ -24,7 +24,7 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
         }
         
         if (config.databases[name]){
-            Response(res, 200, { tables: Object.keys(config.databases[name].tables).length });
+            Response(res, 200, { name: name, tables: Object.keys(config.databases[name].tables).length });
             return;
         }
 

@@ -71,7 +71,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             let hasValidType = true;
             Object.keys(datasObject).forEach(elem => {
-                if (config.databases[databaseName].tables[tableName].columns[elem].type !== typeof datasObject[elem]){
+                if (config.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
                     hasValidType = false;
                 }
             })
@@ -110,19 +110,31 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns);
+            const columnsName = [ "id", ...Object.keys(config.databases[databaseName].tables[tableName].columns) ];
             const strucObject = InitObject(columnsName);
+            console.log("strucObject", strucObject);
             const datasObject = SortObject(JSON.parse(data));
+            console.log("datasObject", datasObject);
 
             let hasValidType = true;
             Object.keys(datasObject).forEach(elem => {
-                if (config.databases[databaseName].tables[tableName].columns[elem].type !== typeof datasObject[elem]){
+                if (elem !== "id"){
+                    if (config.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
+                        hasValidType = false;
+                    }
+                }
+                else if (typeof datasObject[elem] !== "number"){
                     hasValidType = false;
                 }
             })
 
             if(!(CompareObjectStruct(strucObject, datasObject) && hasValidType)){
                 Response(res, 400, { error: "Invalid json" });
+                return;
+            }
+
+            if (id !== datasObject.id){
+                Response(res, 400, { error: `Wrong id !` });
                 return;
             }
 

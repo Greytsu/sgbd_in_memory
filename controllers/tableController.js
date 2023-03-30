@@ -30,6 +30,7 @@ exports.TableController = (req, res, config, datasFiles) => {
         
         if (config.databases[databaseName].tables[tableName]){
             Response(res, 200, {
+                name: tableName,
                 columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
                 datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
             });

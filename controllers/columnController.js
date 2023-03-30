@@ -34,7 +34,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
         
         if (config.databases[databaseName].tables[tableName].columns[name]){
-            Response(res, 200, config.databases[databaseName].tables[tableName].columns[name]);
+            Response(res, 200, { name: name, ...config.databases[databaseName].tables[tableName].columns[name]});
             return;
         }
 
@@ -94,15 +94,29 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
             
+            const strucObject = InitObject(["name","isIndex", "type"]);
             const columnObject = JSON.parse(data);
-            if(!CompareObjectStruct(InitObject(["isIndex"]), columnObject) 
-            || typeof columnObject.isIndex !== 'boolean' ){
+            if(!CompareObjectStruct(strucObject, columnObject) 
+            || typeof columnObject.isIndex !== 'boolean' 
+            || typeof columnObject.name !== 'string'
+            || typeof columnObject.type !== 'string'
+            || !["number", "string", "boolean"].includes(columnObject.type)){
                 Response(res, 400, { error: "Invalid json" });
                 return;
             }
 
             if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
                 Response(res, 400, { error: `The column ${name} does not exist !` });
+                return;
+            }
+
+            if (name !== columnObject.name){
+                Response(res, 400, { error: `Wrong name !` });
+                return;
+            }
+
+            if (config.databases[databaseName].tables[tableName].columns[name].type !== columnObject.type){
+                Response(res, 400, { error: `Type can't be modified !` });
                 return;
             }
 
