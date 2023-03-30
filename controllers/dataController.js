@@ -112,9 +112,7 @@ exports.DataController = (req, res, config, datasFiles) => {
 
             const columnsName = [ "id", ...Object.keys(config.databases[databaseName].tables[tableName].columns) ];
             const strucObject = InitObject(columnsName);
-            console.log("strucObject", strucObject);
             const datasObject = SortObject(JSON.parse(data));
-            console.log("datasObject", datasObject);
 
             let hasValidType = true;
             Object.keys(datasObject).forEach(elem => {

@@ -14,7 +14,6 @@ exports.TableController = (req, res, config, datasFiles) => {
         Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
-    console.log("databaseName", databaseName)
     if(method === 'GET'){
         const tableName = pathSplit[4];
         if (IsEmptyOrNull(tableName) && pathSplit.length === 4){
@@ -72,7 +71,6 @@ exports.TableController = (req, res, config, datasFiles) => {
             datasFiles[filePath].file = datas;
             datasFiles[filePath].interval = SaveFile(filePath, datas)
 
-            console.log("datasFiles", datasFiles)
             Response(res, 201, { name: tableObject.name, columns: 0, datas: 0 });
         });
     }else if(method === 'DELETE' && pathSplit.length === 5){

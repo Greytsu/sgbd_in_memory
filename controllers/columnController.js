@@ -81,8 +81,6 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             }
 
             Object.keys(fileDatas.datas).forEach(id => {
-                console.log("id", id)
-                console.log("columnObject.name", columnObject.name)
                 fileDatas.datas[id][columnObject.name] = null;
             })
 
@@ -162,11 +160,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
         }
         
         Object.keys(fileDatas.datas).forEach(id => {
-            console.log("fileDatas.datas[id]", fileDatas.datas[id]);
-            console.log("columnObject.name", name);
-            console.log("fileDatas.datas[id][columnObject.name]", fileDatas.datas[id][name]);
             delete fileDatas.datas[id][name];
-            console.log(fileDatas.datas[id]);
         })
 
         delete config.databases[databaseName].tables[tableName].columns[name]

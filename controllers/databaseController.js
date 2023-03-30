@@ -10,8 +10,6 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
     
     if(method === 'GET'){
         const name = pathSplit[2];
-        console.log("pathSplit.length", pathSplit.length)
-        console.log("name", name);
         if (IsEmptyOrNull(name) && pathSplit.length === 2){
             Response(res, 200, Object.keys(config.databases).map(databaseName => {
                         return {
