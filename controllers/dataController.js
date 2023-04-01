@@ -10,32 +10,32 @@ exports.DataController = (req, res, config, datasFiles) => {
     const method = req.method;
 
     const databaseName = pathSplit[2];
-    if (!config.databases[databaseName]){
+    if (!config.file.databases[databaseName]){
         Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     const tableName = pathSplit[4];
-    if (!config.databases[databaseName].tables[tableName]){
+    if (!config.file.databases[databaseName].tables[tableName]){
         Response(res, 400, { error: `The table ${tableName} does not exist !` });
         return;
     }
 
-    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
+    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
 
     if(method === 'GET'){
         const id = pathSplit[6];
         if (IsEmptyOrNull(id) && pathSplit.length === 6){
-            let listIds = Object.keys(fileDatas.datas)
+            let listIds = Object.keys(fileDatas.file.datas)
 
             const filters = GetFilter(decodeURI(req))
             if(filters.length > 0) {
-                listIds = DynamicFilter(config.databases[databaseName].tables[tableName].columns, fileDatas, filters)
+                listIds = DynamicFilter(config.file.databases[databaseName].tables[tableName].columns, fileDatas, filters)
             }
 
             let datas = listIds.map(elem => {
                 return{
                     id: elem,
-                    ...fileDatas.datas[elem]
+                    ...fileDatas.file.datas[elem]
                 }
             })
 
@@ -48,8 +48,8 @@ exports.DataController = (req, res, config, datasFiles) => {
             return;
         }
 
-        if (fileDatas.datas[id]){
-            Response(res, 200, { id: id, ...fileDatas.datas[id] });
+        if (fileDatas.file.datas[id]){
+            Response(res, 200, { id: id, ...fileDatas.file.datas[id] });
             return;
         }
 
@@ -65,13 +65,13 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            const columnsName = Object.keys(config.databases[databaseName].tables[tableName].columns)
+            const columnsName = Object.keys(config.file.databases[databaseName].tables[tableName].columns)
             const strucObject = InitObject(columnsName);
             const datasObject = SortObject(JSON.parse(data));
 
             let hasValidType = true;
             Object.keys(datasObject).forEach(elem => {
-                if (config.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
+                if (config.file.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
                     hasValidType = false;
                 }
             })
@@ -81,17 +81,19 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            fileDatas.sequence++
-            fileDatas.datas[fileDatas.sequence] = datasObject;
+            fileDatas.file.sequence++
+            fileDatas.file.datas[fileDatas.file.sequence] = datasObject;
 
-            Object.keys(fileDatas.index).forEach(key => {
-                if (!fileDatas.index[key][datasObject[key]]){
-                    fileDatas.index[key][datasObject[key]] = []
+            Object.keys(fileDatas.file.index).forEach(key => {
+                if (!fileDatas.file.index[key][datasObject[key]]){
+                    fileDatas.file.index[key][datasObject[key]] = []
                 }
-                fileDatas.index[key][datasObject[key]].push(fileDatas.sequence)
+                fileDatas.file.index[key][datasObject[key]].push(fileDatas.file.sequence)
             })
 
-            Response(res, 201, { id: fileDatas.sequence, ...datasObject });
+            fileDatas.isModified = true;
+
+            Response(res, 201, { id: fileDatas.file.sequence, ...datasObject });
         });
     }else if(method === 'PUT' && pathSplit.length === 7){
         const id = parseInt(pathSplit[6]);
@@ -100,7 +102,7 @@ exports.DataController = (req, res, config, datasFiles) => {
             data = chunk.toString();
         }).on('end', () => {
 
-            if (!fileDatas.datas[id]){
+            if (!fileDatas.file.datas[id]){
                 Response(res, 400, { error: `The object ${id} does not exist !` });
                 return;
             }
@@ -110,14 +112,14 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            const columnsName = [ "id", ...Object.keys(config.databases[databaseName].tables[tableName].columns) ];
+            const columnsName = [ "id", ...Object.keys(config.file.databases[databaseName].tables[tableName].columns) ];
             const strucObject = InitObject(columnsName);
             const datasObject = SortObject(JSON.parse(data));
 
             let hasValidType = true;
             Object.keys(datasObject).forEach(elem => {
                 if (elem !== "id"){
-                    if (config.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
+                    if (config.file.databases[databaseName].tables[tableName].columns[elem]?.type !== typeof datasObject[elem]){
                         hasValidType = false;
                     }
                 }
@@ -136,25 +138,27 @@ exports.DataController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            Object.keys(fileDatas.index).forEach(key => {
+            Object.keys(fileDatas.file.index).forEach(key => {
                 
-                const index = fileDatas.index[key][fileDatas.datas[id][key]].findIndex(x => x == id)
+                const index = fileDatas.file.index[key][fileDatas.file.datas[id][key]].findIndex(x => x == id)
                 if (index !== -1){
-                    fileDatas.index[key][fileDatas.datas[id][key]].splice(index, 1);
+                    fileDatas.file.index[key][fileDatas.file.datas[id][key]].splice(index, 1);
                 }
 
-                if (!fileDatas.index[key][datasObject[key]]){
-                    fileDatas.index[key][datasObject[key]] = []
+                if (!fileDatas.file.index[key][datasObject[key]]){
+                    fileDatas.file.index[key][datasObject[key]] = []
                 }
                 
-                fileDatas.index[key][datasObject[key]].push(id)
+                fileDatas.file.index[key][datasObject[key]].push(id)
 
-                if (fileDatas.index[key][fileDatas.datas[id][key]].length === 0){
-                    delete fileDatas.index[key][fileDatas.datas[id][key]]
+                if (fileDatas.file.index[key][fileDatas.file.datas[id][key]].length === 0){
+                    delete fileDatas.file.index[key][fileDatas.file.datas[id][key]]
                 }
             })
 
-            fileDatas.datas[id] = datasObject;
+            fileDatas.file.datas[id] = datasObject;
+
+            fileDatas.isModified = true;
 
             Response(res, 204);
         });
@@ -165,22 +169,24 @@ exports.DataController = (req, res, config, datasFiles) => {
             return;
         }
 
-        if (!fileDatas.datas[id]){
+        if (!fileDatas.file.datas[id]){
             Response(res, 400, { error: `The object ${id} does not exist !` });
             return;
         }
 
-        Object.keys(fileDatas.index).forEach(key => {
-            const index = fileDatas.index[key][fileDatas.datas[id][key]].findIndex(x => x == id)
+        Object.keys(fileDatas.file.index).forEach(key => {
+            const index = fileDatas.file.index[key][fileDatas.file.datas[id][key]].findIndex(x => x == id)
             if (index !== -1){
-                fileDatas.index[key][fileDatas.datas[id][key]].splice(index, 1);
+                fileDatas.file.index[key][fileDatas.file.datas[id][key]].splice(index, 1);
             }
-            if (fileDatas.index[key][fileDatas.datas[id][key]].length === 0){
-                delete fileDatas.index[key][fileDatas.datas[id][key]]
+            if (fileDatas.file.index[key][fileDatas.file.datas[id][key]].length === 0){
+                delete fileDatas.file.index[key][fileDatas.file.datas[id][key]]
             }
         })
         
-        delete fileDatas.datas[id]
+        delete fileDatas.file.datas[id]
+
+        fileDatas.isModified = true;
 
         Response(res, 204);
     }else if(method === 'OPTIONS'){

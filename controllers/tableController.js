@@ -10,27 +10,27 @@ exports.TableController = (req, res, config, datasFiles) => {
     const method = req.method;
 
     const databaseName = pathSplit[2];
-    if (!config.databases[databaseName]){
+    if (!config.file.databases[databaseName]){
         Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     if(method === 'GET'){
         const tableName = pathSplit[4];
         if (IsEmptyOrNull(tableName) && pathSplit.length === 4){
-            Response(res, 200, Object.keys(config.databases[databaseName].tables).map(tableName => {
+            Response(res, 200, Object.keys(config.file.databases[databaseName].tables).map(tableName => {
                     return {
                         name: tableName,
-                        columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
+                        columns: Object.keys(config.file.databases[databaseName].tables[tableName].columns).length,
                         datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
                     };
                 }));
             return;
         }
         
-        if (config.databases[databaseName].tables[tableName]){
+        if (config.file.databases[databaseName].tables[tableName]){
             Response(res, 200, {
                 name: tableName,
-                columns: Object.keys(config.databases[databaseName].tables[tableName].columns).length,
+                columns: Object.keys(config.file.databases[databaseName].tables[tableName].columns).length,
                 datas: Object.keys(datasFiles[`config/${databaseName}_${tableName}.json`].file.datas).length
             });
             return;
@@ -57,7 +57,7 @@ exports.TableController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            if (config.databases[databaseName].tables[tableObject.name]){
+            if (config.file.databases[databaseName].tables[tableObject.name]){
                 Response(res, 400, { error: `The table ${tableObject.name} already exist !` });
                 return;
             }
@@ -66,10 +66,11 @@ exports.TableController = (req, res, config, datasFiles) => {
             const datas = {sequence: 0, index: {}, datas: {}}
             fs.writeFileSync(filePath, JSON.stringify(datas));
             
-            config.databases[databaseName].tables[tableObject.name] = { columns: {}};
-            datasFiles[filePath] = {};
-            datasFiles[filePath].file = datas;
-            datasFiles[filePath].interval = SaveFile(filePath, datas)
+            config.file.databases[databaseName].tables[tableObject.name] = { columns: {}};
+            datasFiles[filePath] = { file: datas, isModified: true};
+            datasFiles[filePath].interval = SaveFile(filePath, datasFiles[filePath])
+
+            config.isModified = true;
 
             Response(res, 201, { name: tableObject.name, columns: 0, datas: 0 });
         });
@@ -80,7 +81,7 @@ exports.TableController = (req, res, config, datasFiles) => {
             return;
         }
         
-        if (!config.databases[databaseName].tables[tableName]){
+        if (!config.file.databases[databaseName].tables[tableName]){
             Response(res, 400, { error: `The table ${tableName} does not exist !` });
             return;
         }
@@ -90,7 +91,9 @@ exports.TableController = (req, res, config, datasFiles) => {
         delete datasFiles[filePath]
         fs.unlinkSync(filePath);
         
-        delete config.databases[databaseName].tables[tableName]
+        delete config.file.databases[databaseName].tables[tableName]
+        
+        config.isModified = true;
 
         Response(res, 204);
     }else if(method === 'OPTIONS'){

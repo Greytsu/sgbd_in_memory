@@ -11,18 +11,18 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
     if(method === 'GET'){
         const name = pathSplit[2];
         if (IsEmptyOrNull(name) && pathSplit.length === 2){
-            Response(res, 200, Object.keys(config.databases).map(databaseName => {
+            Response(res, 200, Object.keys(config.file.databases).map(databaseName => {
                         return {
                             name: databaseName,
-                            tables: Object.keys(config.databases[databaseName].tables).length
+                            tables: Object.keys(config.file.databases[databaseName].tables).length
                         }
                     })
                 );
             return;
         }
         
-        if (config.databases[name]){
-            Response(res, 200, { name: name, tables: Object.keys(config.databases[name].tables).length });
+        if (config.file.databases[name]){
+            Response(res, 200, { name: name, tables: Object.keys(config.file.databases[name].tables).length });
             return;
         }
 
@@ -46,12 +46,13 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
                 return;
             }
             
-            if (config.databases[databaseObject.name]){
+            if (config.file.databases[databaseObject.name]){
                 Response(res, 400, { error: `The database ${databaseObject.name} already exist !` });
                 return;
             }
 
-            config.databases[databaseObject.name] = { tables: {} }
+            config.file.databases[databaseObject.name] = { tables: {} }
+            config.isModified = true;
 
             Response(res, 201, { name: databaseObject.name, tables: 0 });
         });
@@ -63,18 +64,20 @@ exports.DatabaseController = (req, res, config, datasFiles) => {
             return;
         }
         
-        if (!config.databases[name]){
+        if (!config.file.databases[name]){
             Response(res, 400, { error: `The database ${name} does not exist !` });
             return;
         }
 
-        Object.keys(config.databases[name].tables).forEach(elem => {
+        Object.keys(config.file.databases[name].tables).forEach(elem => {
             const filePath = `config/${name}_${elem}.json`
             clearInterval(datasFiles[filePath].interval)
             delete datasFiles[filePath]
             fs.unlinkSync(filePath);
         })
-        delete config.databases[name]
+        delete config.file.databases[name]
+
+        config.isModified = true;
 
         Response(res, 204);
     }else if(method === 'OPTIONS'){

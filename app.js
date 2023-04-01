@@ -20,14 +20,13 @@ if(!fs.existsSync(configFilePath)){
     fs.writeFileSync(configFilePath, '{"databases":{}}');
 }
 const configRaws = fs.readFileSync(configFilePath);
-let config = JSON.parse(configRaws);
+let config = { file: JSON.parse(configRaws), isModified: false}
 
 const datasFiles = {};
-Object.keys(config.databases).forEach(databaseName => {
-    Object.keys(config.databases[databaseName].tables).forEach(tableName => {
+Object.keys(config.file.databases).forEach(databaseName => {
+    Object.keys(config.file.databases[databaseName].tables).forEach(tableName => {
         const dataFilePath = `config/${databaseName}_${tableName}.json`;
-        datasFiles[dataFilePath] = {}
-        datasFiles[dataFilePath].file = JSON.parse(fs.readFileSync(dataFilePath))
+        datasFiles[dataFilePath] = { file: JSON.parse(fs.readFileSync(dataFilePath)), isModified: false }
     })
 });
 
@@ -71,5 +70,5 @@ server.listen(port, hostname, () => {
 SaveFile(configFilePath, config)
 
 Object.keys(datasFiles).forEach(datasFile => {
-    datasFiles[datasFile].interval = SaveFile(datasFile, datasFiles[datasFile].file)
+    datasFiles[datasFile].interval = SaveFile(datasFile, datasFiles[datasFile])
 })

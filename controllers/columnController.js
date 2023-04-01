@@ -8,33 +8,33 @@ exports.ColumnController = (req, res, config, datasFiles) => {
     const method = req.method;
 
     const databaseName = pathSplit[2];
-    if (!config.databases[databaseName]){
+    if (!config.file.databases[databaseName]){
         Response(res, 400, { error: `The database ${databaseName} does not exist !` });
         return;
     }
     const tableName = pathSplit[4];
-    if (!config.databases[databaseName].tables[tableName]){
+    if (!config.file.databases[databaseName].tables[tableName]){
         Response(res, 400, { error: `The table ${tableName} does not exist !` });
         return;
     }
 
-    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`].file
+    const fileDatas = datasFiles[`config/${databaseName}_${tableName}.json`]
 
     if(method === 'GET'){
         const name = pathSplit[6];
         if (IsEmptyOrNull(name) && pathSplit.length === 6){
-            Response(res, 200, Object.keys(config.databases[databaseName].tables[tableName].columns).map(columnName =>{
+            Response(res, 200, Object.keys(config.file.databases[databaseName].tables[tableName].columns).map(columnName =>{
                     return{
                         name: columnName,
-                        ...config.databases[databaseName].tables[tableName].columns[columnName]
+                        ...config.file.databases[databaseName].tables[tableName].columns[columnName]
                     }
                 })
             );
             return;
         }
         
-        if (config.databases[databaseName].tables[tableName].columns[name]){
-            Response(res, 200, { name: name, ...config.databases[databaseName].tables[tableName].columns[name]});
+        if (config.file.databases[databaseName].tables[tableName].columns[name]){
+            Response(res, 200, { name: name, ...config.file.databases[databaseName].tables[tableName].columns[name]});
             return;
         }
 
@@ -66,23 +66,26 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            if (config.databases[databaseName].tables[tableName].columns[columnObject.name] !== undefined){
+            if (config.file.databases[databaseName].tables[tableName].columns[columnObject.name] !== undefined){
                 Response(res, 400, { error: `The column ${columnObject.name} already exist !` });
                 return;
             }
 
-            config.databases[databaseName].tables[tableName].columns[columnObject.name] = { 
+            config.file.databases[databaseName].tables[tableName].columns[columnObject.name] = { 
                 isIndex: columnObject.isIndex,
                 type: columnObject.type
             }
 
             if(columnObject.isIndex){
-                fileDatas.index[columnObject.name] = { }
+                fileDatas.file.index[columnObject.name] = { }
             }
 
-            Object.keys(fileDatas.datas).forEach(id => {
-                fileDatas.datas[id][columnObject.name] = null;
+            Object.keys(fileDatas.file.datas).forEach(id => {
+                fileDatas.file.datas[id][columnObject.name] = null;
             })
+
+            config.isModified = true;
+            fileDatas.isModified = true;
 
             Response(res, 201, columnObject);
         });
@@ -114,7 +117,7 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
+            if (config.file.databases[databaseName].tables[tableName].columns[name] === undefined){
                 Response(res, 400, { error: `The column ${name} does not exist !` });
                 return;
             }
@@ -124,22 +127,25 @@ exports.ColumnController = (req, res, config, datasFiles) => {
                 return;
             }
 
-            if (config.databases[databaseName].tables[tableName].columns[name].type !== columnObject.type){
+            if (config.file.databases[databaseName].tables[tableName].columns[name].type !== columnObject.type){
                 Response(res, 400, { error: `Type can't be modified !` });
                 return;
             }
 
             if(columnObject.isIndex){
-                if (!fileDatas.index[name]){ // column is not an index
-                    fileDatas.index[name] = { }
+                if (!fileDatas.file.index[name]){ // column is not an index
+                    fileDatas.file.index[name] = { }
                 }
             }
             else{
-                if (fileDatas.index[name]){ // column is an index
-                    delete fileDatas.index[name]
+                if (fileDatas.file.index[name]){ // column is an index
+                    delete fileDatas.file.index[name]
                 }
             }
-            config.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
+            config.file.databases[databaseName].tables[tableName].columns[name].isIndex = columnObject.isIndex
+
+            config.isModified = true;
+            fileDatas.isModified = true;
 
             Response(res, 204);
         });
@@ -150,20 +156,23 @@ exports.ColumnController = (req, res, config, datasFiles) => {
             return;
         }
 
-        if (config.databases[databaseName].tables[tableName].columns[name] === undefined){
+        if (config.file.databases[databaseName].tables[tableName].columns[name] === undefined){
             Response(res, 400, { error: `The column ${name} does not exist !` });
             return;
         }
 
-        if (config.databases[databaseName].tables[tableName].columns[name].isIndex){
-            delete fileDatas.index[name]
+        if (config.file.databases[databaseName].tables[tableName].columns[name].isIndex){
+            delete fileDatas.file.index[name]
         }
         
-        Object.keys(fileDatas.datas).forEach(id => {
-            delete fileDatas.datas[id][name];
+        Object.keys(fileDatas.file.datas).forEach(id => {
+            delete fileDatas.file.datas[id][name];
         })
 
-        delete config.databases[databaseName].tables[tableName].columns[name]
+        delete config.file.databases[databaseName].tables[tableName].columns[name]
+
+        config.isModified = true;
+        fileDatas.isModified = true;
 
         Response(res, 204);
     }else if(method === 'OPTIONS'){

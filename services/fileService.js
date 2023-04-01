@@ -1,15 +1,18 @@
 const fs = require('fs');
 
-exports.SaveFile = (filePath, datas) => {
+exports.SaveFile = (filePath, fileObject) => {
     const configDirectoryPath = 'config'
     return setInterval(() => {
-        console.log(`Save file ${filePath}`);
-        if (!fs.existsSync(configDirectoryPath)){
-            fs.mkdirSync(configDirectoryPath);
+        if (fileObject.isModified){
+            console.log(`Save file ${filePath}`);
+            if (!fs.existsSync(configDirectoryPath)){
+                fs.mkdirSync(configDirectoryPath);
+            }
+            if(!fs.existsSync(filePath)){
+                fs.writeFileSync(filePath, JSON.stringify(fileObject.file));
+            }
+            fs.writeFileSync(filePath, JSON.stringify(fileObject.file));
+            fileObject.isModified = false;
         }
-        if(!fs.existsSync(filePath)){
-            fs.writeFileSync(filePath, JSON.stringify(datas));
-        }
-        fs.writeFileSync(filePath, JSON.stringify(datas));
     }, 10000);
 }
