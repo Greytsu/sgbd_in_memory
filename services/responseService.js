@@ -3,7 +3,7 @@ exports.Response = (res, code, messageObject = null) => {
     const pathSplit = path.split("/");
     
     if(path === '/' || path === '/status'){
-        res.setHeader("Access-Control-Allow-Methods", "GET")
+        res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS")
     }else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
         if (pathSplit.length === 2){
             res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")

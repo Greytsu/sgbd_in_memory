@@ -38,8 +38,14 @@ const server = http.createServer((req, res) => {
     if(path === '/' && req.method === 'GET'){
         Response(res, 200, { paths: ["/status", "/databases"] });
     }
+    else if(path === '/' && req.method === 'OPTIONS'){
+        Response(res, 200, { method: ["GET", "OPTIONS"] })
+    }
     else if(path === '/status' && req.method === 'GET'){
         Response(res, 200, { status: "OK" });
+    }
+    else if(path === '/status' && req.method === 'OPTIONS'){
+        Response(res, 200, { method: ["GET", "OPTIONS"] })
     }
     else if(pathSplit[1] === 'databases' && pathSplit.length < 4){
         DatabaseController(req, res, config, datasFiles);
