@@ -5,7 +5,7 @@ const { GetSortFields, SortDatas } = require('../utils/sortUtil');
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
 exports.DataController = (req, res, config, datasFiles) => {
-    const path = req.url.split("?")[0];
+    const path = decodeURI(req.url.split("?")[0]);
     const pathSplit = path.split("/");
     const method = req.method;
 
@@ -27,7 +27,7 @@ exports.DataController = (req, res, config, datasFiles) => {
         if (IsEmptyOrNull(id) && pathSplit.length === 6){
             let listIds = Object.keys(fileDatas.datas)
 
-            const filters = GetFilter(req)
+            const filters = GetFilter(decodeURI(req))
             if(filters.length > 0) {
                 listIds = DynamicFilter(config.databases[databaseName].tables[tableName].columns, fileDatas, filters)
             }
@@ -39,7 +39,7 @@ exports.DataController = (req, res, config, datasFiles) => {
                 }
             })
 
-            const sortFields = GetSortFields(req)
+            const sortFields = GetSortFields(decodeURI(req))
             if(sortFields.length > 0) {
                 datas = SortDatas(datas, sortFields)
             }

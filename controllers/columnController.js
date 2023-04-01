@@ -3,7 +3,7 @@ const { CompareObjectStruct, InitObject } = require('../utils/objectUtil');
 const { IsEmptyOrNull } = require('../utils/stringUtils');
 
 exports.ColumnController = (req, res, config, datasFiles) => {
-    const path = req.url.split("?")[0];
+    const path = decodeURI(req.url.split("?")[0]);
     const pathSplit = path.split("/");
     const method = req.method;
 
