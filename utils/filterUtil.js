@@ -44,7 +44,7 @@ const Compare = (value1, operator, value2) =>{
 }
 
 exports.GetFilter = (req) => {
-    const params = new URLSearchParams(new URL(`localhost:3030${req.url}`).search);
+    const params = new URLSearchParams(new URL(decodeURI(`localhost:3030${req.url}`)).search);
     const filterString = params.get('filters');
     const filterparams = filterString ? filterString.split(',') : []
 

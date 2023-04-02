@@ -27,9 +27,9 @@ exports.DataController = (req, res, config, datasFiles) => {
         if (IsEmptyOrNull(id) && pathSplit.length === 6){
             let listIds = Object.keys(fileDatas.file.datas)
 
-            const filters = GetFilter(decodeURI(req))
+            const filters = GetFilter(req)
             if(filters.length > 0) {
-                listIds = DynamicFilter(config.file.databases[databaseName].tables[tableName].columns, fileDatas, filters)
+                listIds = DynamicFilter(config.file.databases[databaseName].tables[tableName].columns, fileDatas.file, filters)
             }
 
             let datas = listIds.map(elem => {
