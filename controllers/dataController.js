@@ -207,7 +207,7 @@ exports.DataController = (req, res, config, datasFiles) => {
                         name: "sort",
                         methodAllowed: "GET",
                         queryParam: {
-                            key: "sort",
+                            key: "sorts",
                             value: "column name",
                             separator: ",",
                             descending: {
