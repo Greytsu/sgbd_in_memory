@@ -1,5 +1,5 @@
 exports.GetSortFields = (req) => {
-    const params = new URLSearchParams(new URL(`localhost:3030${req.url}`).search);
+    const params = new URLSearchParams(new URL(decodeURI(`localhost:3030${req.url}`)).search);
     const filterString = params.get('sort');
 
     return filterString ? filterString.split(',') : [];

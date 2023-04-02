@@ -39,7 +39,7 @@ exports.DataController = (req, res, config, datasFiles) => {
                 }
             })
 
-            const sortFields = GetSortFields(decodeURI(req))
+            const sortFields = GetSortFields(req)
             if(sortFields.length > 0) {
                 datas = SortDatas(datas, sortFields)
             }
